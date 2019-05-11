@@ -1,0 +1,46 @@
+#
+# Makefile to build simple test for GLM for  M$ Window
+#
+# Author: Alexey Boreskov, <steps3d@narod.ru>
+#
+
+#!include <win32.mak>
+
+DEBUG = 1
+STATIC = 1
+
+!include "../nmake.inc"
+
+MATH = vec2.obj vec3.obj vec4.obj mat2.obj mat3.obj mat4.obj quat.obj plane.obj bbox.obj randUtils.obj eig3.obj kdop.obj
+TEXT = Texture.obj TexImage.obj TgaEncoder.obj TgaDecoder.obj DdsDecoder.obj BmpDecoder.obj JpegDecoder.obj PngDecoder.obj Resources.obj FileSystem.obj ZipFileSystem.obj TexFormat.obj
+WRAP = Data.obj Program.obj VertexBuffer.obj Framebuffer.obj stringUtils.obj glUtilities.obj  UbAccessor.obj Sampler.obj ScreenQuad.obj Sync.obj Query.obj TransformFeedback4.obj Log.obj Pipeline.obj
+#/DWIN32 /D_WINDOWS /W3 /Zm1000 /D_DEBUG /MDd /Zi /Ob0 /Od /RTC1  
+GLFW_LIBS = glfw3.lib  glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+
+EXES = test.exe
+
+all: $(EXES)
+
+test.exe: test.obj quat2tbn.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:$(GLFW_LIB_PATH) $(GLFW_LIBS) libcmt.lib
+
+clean:
+	@del $(EXES) $(OBJS) version.res *.obj *.ilk *.pdb 2> nul
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+.c.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Base/eig3x3}.cpp.obj::
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Base/libs}.cpp.obj::
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Base}.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+version.res : version.rc
+	$(RC) $(RCFLAGS) /r /fo"version.res" version.rc

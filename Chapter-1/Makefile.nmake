@@ -1,0 +1,40 @@
+#
+# Makefile to build simple test for GLM for  M$ Window
+#
+# Author: Alexey Boreskov, <steps3d@narod.ru>
+#
+
+#!include <win32.mak>
+
+DEBUG = 1
+STATIC = 1
+
+!include "../nmake.inc"
+
+EXES = test.exe
+
+all: $(EXES)
+
+test.exe: test.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:$(GLFW_LIB_PATH) $(GLFW_LIBS) libcmt.lib
+
+clean:
+	@del $(EXES) $(OBJS) version.res *.obj *.ilk *.pdb 2> nul
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+.c.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Base/eig3x3}.cpp.obj::
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Base/libs}.cpp.obj::
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Base}.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+version.res : version.rc
+	$(RC) $(RCFLAGS) /r /fo"version.res" version.rc
