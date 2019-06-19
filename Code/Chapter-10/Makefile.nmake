@@ -1,0 +1,42 @@
+#
+# Makefile to build simple test for GLM for  M$ Window
+#
+# Author: Alexey Boreskov, <steps3d@narod.ru>
+#
+
+#!include <win32.mak>
+
+DEBUG = 1
+STATIC = 1
+
+!include "../nmake.inc"
+
+INC = -I../Core -I$(GLM) 
+EXES = trace-1.exe trace-2.exe trace-3.exe trace-4.exe path-tracer.exe
+
+all: $(EXES)
+
+trace-1.exe: trace-1.obj tracer.obj ray.obj TgaImage.obj randUtils.obj
+	$(LINK) $** $(LLDLIBS)  libcmt.lib
+
+trace-2.exe: trace-2.obj tracer.obj csg.obj ray.obj TgaImage.obj randUtils.obj 
+	$(LINK) $** $(LLDLIBS)  libcmt.lib
+
+trace-3.exe: trace-3.obj tracer-2.obj ray.obj TgaImage.obj randUtils.obj
+	$(LINK) $** $(LLDLIBS)  libcmt.lib
+
+trace-4.exe: trace-4.obj tracer-2.obj ray.obj TgaImage.obj randUtils.obj
+	$(LINK) $** $(LLDLIBS)  libcmt.lib
+
+path-tracer.exe: path-tracer.obj ray.obj TgaImage.obj randUtils.obj  
+	$(LINK) $** $(LLDLIBS)  libcmt.lib
+
+clean:
+	@del $(EXES) $(OBJS) version.res *.obj *.ilk *.pdb 2> nul
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Core}.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+

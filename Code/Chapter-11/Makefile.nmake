@@ -1,0 +1,45 @@
+#
+# Makefile to build simple test for GLM for  M$ Window
+#
+# Author: Alexey Boreskov, <steps3d@narod.ru>
+#
+
+#!include <win32.mak>
+
+DEBUG = 1
+STATIC = 1
+
+!include "../nmake.inc"
+
+#MATH = vec2.obj vec3.obj vec4.obj mat2.obj mat3.obj mat4.obj quat.obj plane.obj bbox.obj randUtils.obj eig3.obj kdop.obj
+#TEXT = Texture.obj TexImage.obj TgaEncoder.obj TgaDecoder.obj DdsDecoder.obj BmpDecoder.obj JpegDecoder.obj PngDecoder.obj Resources.obj FileSystem.obj ZipFileSystem.obj TexFormat.obj
+#WRAP = Data.obj Program.obj VertexBuffer.obj Framebuffer.obj stringUtils.obj glUtilities.obj  UbAccessor.obj Sampler.obj ScreenQuad.obj Sync.obj Query.obj TransformFeedback4.obj Log.obj Pipeline.obj
+#/DWIN32 /D_WINDOWS /W3 /Zm1000 /D_DEBUG /MDd /Zi /Ob0 /Od /RTC1  
+
+INC = -I../Core -I../Core/libs -I$(FREEGLUT)/include -I$(GLEW)/include -I$(GLFW)/include -I$(GLM) -Ilibs -I. -I$(OCL_INC_PATH)
+
+GLFW_LIBS = glfw3.lib  glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib msvcrt.lib
+CFLAGS   = $(CFLAGS) /EHsc $(DEBUG_COMPILE_FLAGS) -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -DFREEGLUT_STATIC
+
+EXES = test.exe test-simple.exe glfw-test.exe
+
+all: $(EXES)
+
+test.exe: test.obj GlutWindow.obj TgaImage.obj
+	$(LINK) $** $(LLDLIBS)
+
+test-simple.exe: test-simple.obj TgaImage.obj
+	$(LINK) $** $(LLDLIBS)
+
+glfw-test.exe: glfw-test.obj TgaImage.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:$(GLFW_LIB_PATH) $(GLFW_LIBS) 
+
+clean:
+	@del $(EXES) $(OBJS) version.res *.obj *.ilk *.pdb 2> nul
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Core}.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+

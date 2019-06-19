@@ -1,0 +1,87 @@
+#
+# Makefile to build simple test for GLM for  M$ Window
+#
+# Author: Alexey Boreskov, <steps3d@narod.ru>
+#
+
+#!include <win32.mak>
+
+DEBUG = 1
+STATIC = 1
+
+!include "../nmake.inc"
+
+#MATH = vec2.obj vec3.obj vec4.obj mat2.obj mat3.obj mat4.obj quat.obj plane.obj bbox.obj randUtils.obj eig3.obj kdop.obj
+#TEXT = Texture.obj TexImage.obj TgaEncoder.obj TgaDecoder.obj DdsDecoder.obj BmpDecoder.obj JpegDecoder.obj PngDecoder.obj Resources.obj FileSystem.obj ZipFileSystem.obj TexFormat.obj
+#WRAP = Data.obj Program.obj VertexBuffer.obj Framebuffer.obj stringUtils.obj glUtilities.obj  UbAccessor.obj Sampler.obj ScreenQuad.obj Sync.obj Query.obj TransformFeedback4.obj Log.obj Pipeline.obj
+#/DWIN32 /D_WINDOWS /W3 /Zm1000 /D_DEBUG /MDd /Zi /Ob0 /Od /RTC1  
+
+INC = -I../Core -I../Core/libs -I$(FREEGLUT)/include -I$(GLEW)/include -I$(GLFW)/include -I$(GLM) -Ilibs -I. -I$(OCL_INC_PATH) -I../Libs/SOIL -I../External
+
+GLFW_LIBS = glfw3.lib  glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+CFLAGS   = $(CFLAGS) /EHsc $(DEBUG_COMPILE_FLAGS) -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -DFREEGLUT_STATIC
+OBJS     = GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj Texture.obj SOIL.obj stb_image_aug.obj image_helper.obj image_DXT.obj randUtils.obj Framebuffer.obj bbox.obj
+EXES     = fur.exe glass.exe glass-2.exe envmapping.exe reflection.exe embm.exe fire.exe sdf.exe pbr.exe bumpmapping.exe explosion.exe projective.exe shadow-mapping.exe shadow-mapping-2.exe burn.exe burn-2.exe
+
+all: $(EXES)
+
+fur.exe: fur.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+glass.exe: glass.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+glass-2.exe: glass-2.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+embm.exe: embm.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+envmapping.exe: envmapping.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+reflection.exe: reflection.obj Camera.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+fire.exe: fire.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+sdf.exe: sdf.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+bumpmapping.exe: bumpmapping.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+explosion.exe: explosion.obj $(OBJS)
+	$(LINK) $** $(LLDLIBS)
+
+pbr.exe: pbr.obj $(OBJS) MeshLoader.obj 
+	$(LINK) $** $(LLDLIBS) /LIBPATH:../Libs/assimp assimp-vc120-mt.lib 
+
+projective.exe: projective.obj $(OBJS) MeshLoader.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:../Libs/assimp assimp-vc120-mt.lib 
+
+shadow-mapping.exe: shadow-mapping.obj $(OBJS) MeshLoader.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:../Libs/assimp assimp-vc120-mt.lib 
+
+shadow-mapping-2.exe: shadow-mapping-2.obj $(OBJS) MeshLoader.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:../Libs/assimp assimp-vc120-mt.lib 
+
+burn.exe: burn.obj $(OBJS) MeshLoader.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:../Libs/assimp assimp-vc120-mt.lib 
+
+burn-2.exe: burn-2.obj $(OBJS) MeshLoader.obj
+	$(LINK) $** $(LLDLIBS) /LIBPATH:../Libs/assimp assimp-vc120-mt.lib 
+
+clean:
+	@del $(EXES) $(OBJS) *.obj *.ilk *.pdb 2> nul
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Core}.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Libs/SOIL}.c.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+

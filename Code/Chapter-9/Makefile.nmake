@@ -1,0 +1,75 @@
+#
+# Makefile to build simple test for GLM for  M$ Window
+#
+# Author: Alexey Boreskov, <steps3d@narod.ru>
+#
+
+#!include <win32.mak>
+
+DEBUG = 1
+STATIC = 1
+
+!include "../nmake.inc"
+
+INC = -I../Core -I../Core/libs -I$(FREEGLUT)/include -I$(GLEW)/include -I$(GLFW)/include -I$(GLM) -Ilibs -I. -I$(OCL_INC_PATH)
+GLFW_LIBS = glfw3.lib  glu32.lib opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
+CFLAGS   = $(CFLAGS) /EHsc $(DEBUG_COMPILE_FLAGS) -DWIN32 -D_CRT_SECURE_NO_DEPRECATE -DFREEGLUT_STATIC
+
+EXES = lambert.exe blinn-phong.exe phong.exe oren-nayar.exe oren-nayar-opt.exe cook-torrance.exe ashikhmin-shirley.exe disney.exe ward.exe minnaert.exe lommel-seeliger.exe strauss.exe aniso.exe phong-normalized.exe blinn-phong-normalized.exe
+
+all: $(EXES)
+
+lambert.exe: lambert.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+blinn-phong.exe: blinn-phong.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+phong.exe: phong.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+phong-normalized.exe: phong-normalized.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+oren-nayar.exe: oren-nayar.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+oren-nayar-opt.exe: oren-nayar-opt.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+cook-torrance.exe: cook-torrance.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+ashikhmin-shirley.exe: ashikhmin-shirley.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+disney.exe: disney.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+ward.exe: ward.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+minnaert.exe: minnaert.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+lommel-seeliger.exe: lommel-seeliger.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+strauss.exe: strauss.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+aniso.exe: aniso.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+blinn-phong-normalized.exe: blinn-phong-normalized.obj GlutWindow.obj TgaImage.obj Program.obj Data.obj stringUtils.obj VertexBuffer.obj BasicMesh.obj
+	$(LINK) $** $(LLDLIBS)
+
+clean:
+	@del $(EXES) $(OBJS) version.res *.obj *.ilk *.pdb 2> nul
+
+.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
+{../Core}.cpp.obj:
+	$(CC) $(CFLAGS) $(INC) /c $<
+
