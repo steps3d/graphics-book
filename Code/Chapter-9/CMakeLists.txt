@@ -42,7 +42,7 @@ target_link_libraries(phong Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
 add_executable(phong-normalised phong-normalised.cpp)
 target_link_libraries(phong-normalised Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
 
-add_executable(oern-nayar oren-nayar.cpp)
+add_executable(oren-nayar oren-nayar.cpp)
 target_link_libraries(oren-nayar Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
 
 add_executable(oren-nayar-opt oren-nayar-opt.cpp)
