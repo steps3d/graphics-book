@@ -12,6 +12,7 @@
 #define GLM_SWIZZLE
 #include <glm/vec3.hpp>
 #include <glm/geometric.hpp>
+#include <limits>
 #include "plane.h"
 
 class   bbox
@@ -91,12 +92,12 @@ public:
 
 	void    reset ()
 	{
-		minPoint.x = FLT_MAX;
-		minPoint.y = FLT_MAX;
-		minPoint.z = FLT_MAX;
-		maxPoint.x = -FLT_MAX;
-		maxPoint.y = -FLT_MAX;
-		maxPoint.z = -FLT_MAX;
+		minPoint.x = std::numeric_limits<float>::max();
+		minPoint.y = std::numeric_limits<float>::max();
+		minPoint.z = std::numeric_limits<float>::max();
+		maxPoint.x = std::numeric_limits<float>::min();
+		maxPoint.y = std::numeric_limits<float>::min();
+		maxPoint.z = std::numeric_limits<float>::min();
 	}
 
 	void merge ( const bbox& box )

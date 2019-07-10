@@ -28,18 +28,18 @@ endif ()
 
 include_directories("../Core")
 
-add_library(Core  ../Core/TgaImage.cpp .)
+add_library(Core  ../Core/TgaImage.cpp ../Core/ray.cpp ../Core/bbox.cpp ../Core/randUtils.cpp .)
 
-add_executable(trace-1 trace-1.cpp)
+add_executable(trace-1 trace-1.cpp tracer.cpp )
 target_link_libraries(trace-1 Core)
 
-add_executable(trace-2 trace-2.cpp)
+add_executable(trace-2 trace-2.cpp tracer.cpp csg.cpp )
 target_link_libraries(trace-2 Core)
 
-add_executable(trace-3 trace-3.cpp)
+add_executable(trace-3 trace-3.cpp tracer-2.cpp )
 target_link_libraries(trace-3 Core)
 
-add_executable(trace-4 trace-4.cpp)
+add_executable(trace-4 trace-4.cpp tracer-2.cpp)
 target_link_libraries(trace-4 Core)
 
 add_executable(path-tracer path-tracer.cpp)

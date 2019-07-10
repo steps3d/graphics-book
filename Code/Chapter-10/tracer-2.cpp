@@ -4,6 +4,7 @@
 // Author: Alexey V. Boreskov
 //
 
+#include <stdio.h>
 #include <chrono>
 #include "tracer-2.h"
 #include "randUtils.h"

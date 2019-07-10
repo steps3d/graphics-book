@@ -29,7 +29,7 @@ TgaImage::~TgaImage ()
 
 bool TgaImage::writeToFile ( const char * fileName )
 {
-	int	file = open ( fileName, O_WRONLY | O_BINARY | O_CREAT, S_IWRITE );
+	int	file = open ( fileName, O_RDWR | O_BINARY | O_CREAT, S_IWRITE | S_IREAD );
 	
 	if ( file == -1 )
 		return false;

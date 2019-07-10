@@ -28,7 +28,7 @@ endif ()
 
 include_directories("../Core" "../Libs/SOIL")
 
-add_library(Core  ../Core/GlutWindow.cpp ../Core/TgaImage.cpp ../Core/Program.cpp ../Core/Data.cpp ../Core/stringUtils.cpp ../Core/VertexBuffer.cpp ../Core/BasicMesh.cpp ../Core/Texture.cpp ../Libs/SOIL/SOIL.c ../Libs/SOIL/stb_image_aug.c ../Libs/SOIL/image_helper.c ../Libs/SOIL/image_DXT.c ../Core/randUtils.cpp ../Core/Framebuffer.cpp ../Core/Camera.cpp  ../Core/ScreenQuad.cpp ../Core/MeshLoader.cpp )
+add_library(Core  ../Core/GlutWindow.cpp ../Core/TgaImage.cpp ../Core/Program.cpp ../Core/Data.cpp ../Core/stringUtils.cpp ../Core/VertexBuffer.cpp ../Core/BasicMesh.cpp ../Core/Texture.cpp ../Libs/SOIL/SOIL.c ../Libs/SOIL/stb_image_aug.c ../Libs/SOIL/image_helper.c ../Libs/SOIL/image_DXT.c ../Core/randUtils.cpp ../Core/Framebuffer.cpp ../Core/Camera.cpp  ../Core/ScreenQuad.cpp ../Core/MeshLoader.cpp ../Core/bbox.cpp )
 
 add_executable(test test.cpp)
 target_link_libraries(test Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
@@ -40,5 +40,5 @@ add_executable(sphere sphere.cpp)
 target_link_libraries(sphere Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
 
 
-install(TARGETS debug DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/.. )
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/*.glsl DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+#install(TARGETS debug DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/.. )
+#//file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/*.glsl DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )

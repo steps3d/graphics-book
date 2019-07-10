@@ -7,6 +7,7 @@
 	#define	M_PI	3.1415926f
 #endif
 
+#include	<stdio.h>
 #include	<cassert>
 #include	<algorithm>
 #include	<chrono>
@@ -14,6 +15,7 @@
 #include 	<glm/vec3.hpp>
 #include 	<glm/vec4.hpp>
 #include	<glm/geometric.hpp>
+#include	<stdio.h>
 #include	"ray.h"
 #include	"TgaImage.h"
 #include	"randUtils.h"
@@ -211,7 +213,7 @@ glm::vec3 Scene::tracePath ( const ray& r, int depth ) const
 	if ( glm::dot ( n, dir ) < 0 )
 		dir = -dir;
 	
-	glm::vec3	brdf = c / M_PI;		// diffuse BRDF
+	glm::vec3	brdf = c / glm::vec3 ( M_PI );		// diffuse BRDF
 
 	return surf.emission + brdf * 3.1415926f * std::max ( glm::dot ( n, dir ), 0.0f ) * 
 	                       tracePath ( ray ( hit.pos, dir ), depth );

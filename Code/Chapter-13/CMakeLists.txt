@@ -24,60 +24,61 @@ else ()
 	set ( GLEW_LIB GLEW )
 	set ( GL_LIB		GL )
 	set ( GLUT_LIB      glut )
+	set ( ASSIMP_LIB	assimp )
 endif ()
 
 include_directories("../Core" "../Libs/SOIL")
 
-add_library(Core  ../Core/GlutWindow.cpp ../Core/TgaImage.cpp ../Core/Program.cpp ../Core/Data.cpp ../Core/stringUtils.cpp ../Core/VertexBuffer.cpp ../Core/BasicMesh.cpp ../Core/Texture.cpp ../Libs/SOIL/SOIL.c ../Libs/SOIL/stb_image_aug.c ../Libs/SOIL/image_helper.c ../Libs/SOIL/image_DXT.c ../Core/randUtils.cpp ../Core/Framebuffer.cpp ../Core/Camera.cpp  ../Core/ScreenQuad.cpp ../Core/MeshLoader.cpp )
+add_library(Core  ../Core/GlutWindow.cpp ../Core/TgaImage.cpp ../Core/Program.cpp ../Core/Data.cpp ../Core/stringUtils.cpp ../Core/VertexBuffer.cpp ../Core/BasicMesh.cpp ../Core/Texture.cpp ../Libs/SOIL/SOIL.c ../Libs/SOIL/stb_image_aug.c ../Libs/SOIL/image_helper.c ../Libs/SOIL/image_DXT.c ../Core/randUtils.cpp ../Core/Framebuffer.cpp ../Core/Camera.cpp  ../Core/ScreenQuad.cpp ../Core/MeshLoader.cpp ../Core/bbox.cpp )
 
 add_executable(fur fur.cpp)
-target_link_libraries(fur Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(fur Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(glass glass.cpp)
-target_link_libraries(glass Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(glass Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(glass-2 glass-2.cpp)
-target_link_libraries(glass-2 Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(glass-2 Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(embm embm.cpp)
-target_link_libraries(embm Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(embm Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(envmapping envmapping.cpp)
-target_link_libraries(envmapping Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(envmapping Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(reflection reflection.cpp)
-target_link_libraries(reflection Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(reflection Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(fire fire.cpp)
-target_link_libraries(fire Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(fire Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(sdf sdf.cpp)
-target_link_libraries(sdf Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(sdf Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(bumpmapping bumpmapping.cpp)
-target_link_libraries(bumpmapping Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(bumpmapping Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(explosion explosion.cpp)
-target_link_libraries(explosion Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(explosion Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(pbr pbr.cpp)
-target_link_libraries(pbr Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(pbr Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(projective projective.cpp)
-target_link_libraries(projective Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(projective Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(shadow-mapping shadow-mapping.cpp)
-target_link_libraries(shadow-mapping Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(shadow-mapping Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(shadow-mapping-2 shadow-mapping-2.cpp)
-target_link_libraries(shadow-mapping-2 Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(shadow-mapping-2 Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(burn burn.cpp)
-target_link_libraries(burn Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(burn Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 add_executable(burn-2 burn-2.cpp)
-target_link_libraries(burn-2 Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
+target_link_libraries(burn-2 Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} ${ASSIMP_LIB} )
 
 
-install(TARGETS debug DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/.. )
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/*.glsl DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+#install(TARGETS debug DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/.. )
+#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/*.glsl DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
