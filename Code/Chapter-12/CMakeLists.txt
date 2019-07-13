@@ -40,5 +40,8 @@ add_executable(sphere sphere.cpp)
 target_link_libraries(sphere Core ${GLEW_LIB} ${GL_LIB} ${GLUT_LIB} )
 
 
-#install(TARGETS debug DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/.. )
-#//file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/*.glsl DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+if (WIN32)
+	install(TARGETS test DESTINATION  ${CMAKE_SOURCE_DIR} )
+	install(TARGETS test-classes DESTINATION  ${CMAKE_SOURCE_DIR} )
+	install(TARGETS sphere DESTINATION  ${CMAKE_SOURCE_DIR} )
+endif ()
