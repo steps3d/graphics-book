@@ -8,10 +8,10 @@
 
 #include	<string.h>
 
-		// get current OpenGL error desc or NULL if no error
+		// get current OpenGL error desc or nullptr if no error
 const char * getGlErrorString ();
 
-		// get bound framebuffer error or NULL if no error
+		// get bound framebuffer error or nullptr if no error
 const char * checkFramebuffer ();
 
 		// check for error and print if any

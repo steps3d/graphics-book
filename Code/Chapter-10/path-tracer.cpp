@@ -15,7 +15,6 @@
 #include 	<glm/vec3.hpp>
 #include 	<glm/vec4.hpp>
 #include	<glm/geometric.hpp>
-#include	<stdio.h>
 #include	"ray.h"
 #include	"TgaImage.h"
 #include	"randUtils.h"

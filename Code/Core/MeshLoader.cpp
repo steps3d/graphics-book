@@ -69,8 +69,8 @@ BasicMesh * loadMesh ( const char * fileName, float scale )
 	const int        flags = aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals;
 	const aiScene  * scene = importer.ReadFile ( fileName, flags );
 
-	if ( scene == NULL )
-		return NULL;
+	if ( scene == nullptr )
+		return nullptr;
 		
 	return 	loadMeshFromMesh ( scene -> mMeshes [0], scale );
 }
@@ -97,8 +97,8 @@ bool loadMeshAndMaterials ( const char * fileName, std::vector<BasicMesh*>& mesh
 	
 	printf ( "Path %s\n", path.c_str () );
 	
-	if ( scene == NULL )
-		return NULL;
+	if ( scene == nullptr )
+		return nullptr;
 		
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 	{
@@ -111,14 +111,14 @@ bool loadMeshAndMaterials ( const char * fileName, std::vector<BasicMesh*>& mesh
 		mat -> setName ( name.C_Str());
 		
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-			if (material->GetTexture(aiTextureType_DIFFUSE, 0, &name, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			if (material->GetTexture(aiTextureType_DIFFUSE, 0, &name, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
 			{
 				printf ( "\tDiffuse %s\n", name.C_Str () );
 				mat->setDiffuseMap ( path + name.C_Str() );
 			}
 
 		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
-			if (material->GetTexture(aiTextureType_SPECULAR, 0, &name, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
+			if (material->GetTexture(aiTextureType_SPECULAR, 0, &name, nullptr, nullptr, nullptr, nullptr, nullptr) == AI_SUCCESS)
 			{
 				printf ( "\tSpecular %s\n", name.C_Str () );
 				mat->setSpecMap ( path + name.C_Str () );
@@ -181,8 +181,8 @@ bool loadAllMeshes ( const char * fileName, MultiMesh& mesh, std::vector<BasicMa
 	
 	printf ( "Path %s\n", path.c_str () );
 	
-	if ( scene == NULL )
-		return NULL;
+	if ( scene == nullptr )
+		return nullptr;
 		
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 	{

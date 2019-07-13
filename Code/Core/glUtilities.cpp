@@ -18,7 +18,7 @@ const char * getGlErrorString ()
 	{
 		switch ( error )
 		{
-		case GL_NO_ERROR:				// no error, return NULL
+		case GL_NO_ERROR:				// no error, return nullptr
 			return nullptr;
 			
 		case GL_INVALID_ENUM:
