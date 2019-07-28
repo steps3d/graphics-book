@@ -1,0 +1,15 @@
+For building examples for the book you will need following libraries:
+	- GLM
+	- freeglut
+	- GLEW
+	- assimp
+
+For some examples you will need Qt and GLFW.
+
+For Linux just install these libraries, then you can use cmake or 
+Makefile.linux.
+
+For Window you need explicitly to specify path to those libraries in 
+nmake.inc or CMakeLists.txt files.
+
+
