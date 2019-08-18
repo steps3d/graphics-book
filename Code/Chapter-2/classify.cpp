@@ -2,7 +2,15 @@ int classify ( const glm::vec2& a, const glm::vec2& b, const glm::vec2& p )
 {
 	const glm::vec2 a2b  = b - a;	// от a к b
 	const glm::vec2 a2p  = p - a;	// от a к p
-	float           area = a2b.x*a2p.y - a2p.x*a2b.y;
+
+				// проверить на совпадение концов отрезка
+	if ( fabs ( a2b.x ) + fabs ( a2b.y ) < EPS )
+		if ( fabs ( a2p.x ) + fabs ( a2p.y ) < EPS )
+			return DEGENERATE_COINCIDE;	// a == b == p
+		else
+			return DEGENERATE_DIFFERENT;	// a == b != p
+			                             
+	float	area = a2b.x*a2p.y - a2p.x*a2b.y;
 
 	if ( area > EPS )
 		return LEFT;

@@ -1,3 +1,13 @@
+# Settings for Makefile.nmake to build executables
+# These are used only in Makefile.nmake, not for cmake
+#
+# Here the paths to installed under Windows libraries
+# FREEGLUT - path to installed freeglut library
+# GLEW     - path to installed GLEW library
+# GLM      - path to installed GLM
+# GLFW     - path to installed GLFW
+# OpenCL/CUDA are not used in this book
+
 LIBS_ROOT     = f:/Libraries
 GPU_LIBS      = C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.1
 FREEGLUT      = $(LIBS_ROOT)/freeglut-3.0.0
@@ -12,7 +22,6 @@ OCL_LIB_PATH  = "$(GPU_LIBS)/lib/Win32/"
 CUDA_INC_PATH = "$(GPU_LIBS)/include/"
 CUDA_LIB_PATH = "$(GPU_LIBS)/lib/Win32/"
 
-#INC = $(INC) -I../Base -I../Base/libs -I$(FREEGLUT) -I$(GLEW)/include -I$(GLFW)/include -I$(GLM) -Ilibs -I. -I$(OCL_INC_PATH)
 INC = $(INC) -I../Core -I$(FREEGLUT)/include -I$(GLEW)/include -I$(GLFW)/include -I$(GLM) -Ilibs -I. -I$(OCL_INC_PATH)
 
 !if defined (DEBUG)
