@@ -60,7 +60,7 @@ void updateFrontier ( std::set<edge>& frontier, const glm::vec2& a, const glm::v
 {
 	edge e = edge ( a, b );
 	
-	if ( std::hash_set<edge>::iterator it = frontier.find ( e ) != frontier.end () )
+	if ( ( std::hash_set<edge>::iterator it = frontier.find ( e ) ) != frontier.end () )
 		frontier.erase ( it );
 	else
 		frontier.insert ( edge ( b, a ) );
@@ -90,7 +90,7 @@ edge hullEdge ( glm::vec2 * p, int n )
 bool mate ( const edge& e, const glm::vec2 * p, int n, glm::vec2& v )
 {
 	glm::vec2 * bestVertex = nullptr;
-	float		bestT      = FLT_MAX;
+	float		t, bestT      = FLT_MAX;
 	edge        f = rotate ( e );
 	
 	for ( int i = 0; i < n; i++ )

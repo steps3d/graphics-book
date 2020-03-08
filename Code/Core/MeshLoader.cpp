@@ -156,6 +156,8 @@ bool loadMeshAndMaterials ( const char * fileName, std::vector<BasicMesh*>& mesh
 		meshes.push_back ( mesh );
 	}
 
+	delete scene;
+
 	return true;
 }
 
@@ -262,6 +264,8 @@ bool loadAllMeshes ( const char * fileName, MultiMesh& mesh, std::vector<BasicMa
 	
 	for ( auto& v : mesh.vertices )
 		mesh.box.addVertex ( v.pos );
+
+	delete scene;
 	
 	return true;
 }
