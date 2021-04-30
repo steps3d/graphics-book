@@ -10,7 +10,7 @@ bool isConvex ( const glm::vec2 v [], int n )
         cur  = v [i];
         dir  = cur - prev;                 // edge direction vector
         n    = glm::vec2 ( dir.y, -dir.x );// normal to edge [prev, cur]
-        d    = -glm::dotdot ( nv, cur );    // so line's equation is (p,n) + d = 0
+        d    = -glm::dot ( nv, cur );    // so line's equation is (p,n) + d = 0
         sign = 0;                          // unknown yet
 
         for ( int j = 0; j < n; j++ )
