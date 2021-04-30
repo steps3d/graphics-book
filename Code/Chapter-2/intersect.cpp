@@ -6,7 +6,7 @@ bool doLinesCoincide ( const glm::vec2& n1, float d1,
 
     float ncos = glm::dot(n1 , n2);
 
-    // Angle between normals is 90 degrees (cos = 1)
+    // Angle between normals is 0 degrees (cos = 1)
 	if (fabs(ncos - 1) < EPS)
     {
 		return fabs ( d1 - d2 ) < EPS;
