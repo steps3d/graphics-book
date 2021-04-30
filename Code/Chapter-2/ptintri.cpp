@@ -19,7 +19,7 @@ bool pointInTriangle ( const glm::vec2& a, const glm::vec2& b, const glm::vec2& 
 	if ( u < 0 || u > 1 )
 		return false;
 
-	const float     v = (pa*ab - pb*aa) / d;
+	const float v = (pb*aa - pa*ab) / d;
 
 	if ( v < 0 || v > 1 )
 		return false;
