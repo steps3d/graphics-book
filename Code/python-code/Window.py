@@ -84,7 +84,6 @@ class Window:
         pass
         
     def key ( self, key, scancode, action, mods ):
-        #print ( '---', key, scancode )
         if key in (256, 81, 113):        # Esc or q or Q
             glfw.set_window_should_close ( self.window, glfw.TRUE )
         
@@ -154,14 +153,13 @@ class Window:
     def run ( self ):
         self.reshape ( self.width, self.height )           # it's not called before 1st render
         while not glfw.window_should_close ( self.window ):
-            glfw.poll_events()
-            
-            self.redisplay ()
-            glfw.swap_buffers(self.window)
-            self.idle ()
+            self.idle         ()
+            glfw.poll_events  ()
+            self.redisplay    ()
+            glfw.swap_buffers ( self.window )
         glfw.terminate()
      
-    
+   
 class RotationWindow (Window):
     def __init__ ( self, w, h, title ):
         super().__init__ ( w, h, title )
@@ -176,10 +174,6 @@ class RotationWindow (Window):
         self.reshape ( self.getWidth (), self.getHeight () )
         
     def getRotation ( self ):
-        # glm::mat4 m ( 1 );  
-        # m = glm::rotate(m, glm::radians(-rot.z), glm::vec3(0, 0, 1));
-        # m = glm::rotate(m, glm::radians(rot.y),  glm::vec3(0, 1, 0));
-        # m = glm::rotate(m, glm::radians(rot.x),  glm::vec3(1, 0, 0));
         m = glm.mat4 ( 1 )
         m = glm.rotate ( m, glm.radians ( -self.rot.z ), glm.vec3 ( 0, 0, 1 ) )
         m = glm.rotate ( m, glm.radians (  self.rot.y ), glm.vec3 ( 0, 1, 0 ) )

@@ -11,11 +11,10 @@ class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
         self.eye      = glm.vec3 ( -7, 0, 0 )
-        self.lightDir = glm.vec3 ( -1, 1, 1 )
+        self.light    = glm.vec3 ( -1, 1, 1 )
         self.shader   = Program.Program ( vertex = "cook-torrance.vsh", fragment = "cook-torrance.fsh" )
         self.mesh     = Mesh.Mesh.createKnot ( 1, 1, 120, 30 )
         self.shader.use ()
-        self.idle ()
 
     def redisplay ( self ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )
@@ -42,15 +41,12 @@ class   MyWindow ( Window.RotationWindow ):
         self.shader.setUniformVec ( "eye",   self.eye   )
         self.shader.setUniformVec ( "light", self.light )
 
-
 def main():
     win = MyWindow ( 900, 900, "Cook-Torrance shading model" )
 
     if not win:
         glfw.terminate()
         return
-
-
 
     win.run ()
 

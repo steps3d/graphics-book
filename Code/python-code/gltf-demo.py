@@ -117,14 +117,11 @@ class   MyWindow ( Window.RotationWindow ):
         self.eye      = glm.vec3 ( -7, 0, 0 )
         self.lightDir = glm.vec3 ( -1, 1, 1 )
         self.shader   = Program.Program ( vertex = "cook-torrance-tex.vsh", fragment = "cook-torrance-tex.fsh" )
-        #self.mesh     = Mesh.Mesh.createKnot ( 1, 1, 120, 30 )
-        #self.mesh   = mesh.Mesh.createBox ( glm.vec3 ( -0.5 ), glm.vec3(1) )
         self.mesh   = loadGltf ( filename )
         self.tex    = Texture.Texture ( os.path.dirname(filename)+'/Avocado_baseColor.png' ) 
         self.shader.use ()
         self.tex.bind ()
         self.shader.setTexture('baseColor', 0)
-        self.idle ()
 
     def redisplay ( self ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )
@@ -159,8 +156,6 @@ def main():
     if not win:
         glfw.terminate()
         return
-
-
 
     win.run ()
 

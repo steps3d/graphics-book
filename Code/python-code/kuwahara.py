@@ -19,7 +19,6 @@ class   MyWindow ( Window.RotationWindow ):
         self.image.bind ( 0 )
         self.shader.setTexture    ( "image", 0 )
         self.shader.setUniformInt ( "radius", self.radius )
-        self.idle ()
 
     def redisplay ( self ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )
@@ -34,8 +33,6 @@ def main():
     if not win:
         glfw.terminate()
         return
-
-
 
     win.run ()
 

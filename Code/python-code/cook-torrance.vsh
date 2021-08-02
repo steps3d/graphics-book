@@ -14,6 +14,7 @@ out vec3  n;
 out vec3  v;
 out vec3  l;
 out vec2  tx;
+
 void main(void)
 {
 	vec4 	p = mv * vec4 ( pos, 1.0 );

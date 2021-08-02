@@ -19,7 +19,6 @@ class   MyWindow ( Window.RotationWindow ):
         self.shader   = Program.Program ( glsl = "aniso.glsl" )
         self.mesh     = Mesh.Mesh.createKnot ( 1, 1, 120, 30 )
         self.shader.use ()
-        self.idle ()
 
     def redisplay ( self ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )

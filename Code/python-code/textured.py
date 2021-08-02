@@ -10,15 +10,13 @@ import Mesh
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
-        #self.eye       = glm.vec3 ( -7, 0, 0 )
         self.shader    = Program.Program ( vertex = "textured.vsh", fragment = "textured.fsh" )
         self.mesh      = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
-        self.texture   = Texture.Texture ( 'rusted_iron/albedo.png' ) 
+        self.texture   = Texture.Texture ( '../../Textures/block.jpg' ) 
 		
         self.texture.bind       ( 0 )
         self.shader.use         ()
-        self.shader.setTexture  ( "albedoMap",     0 )
-        self.idle               ()
+        self.shader.setTexture  ( "image", 0 )
 
     def redisplay ( self ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )
@@ -35,7 +33,6 @@ class   MyWindow ( Window.RotationWindow ):
     def mouseScroll ( self, dx, dy ):
         self.eye += glm.vec3 ( 0.1 * ( 1 if dy >= 0 else -1 ) )
         self.reshape ( self.width, self.height )
-
 
 def main():
     win = MyWindow ( 900, 900, "Textured example" )

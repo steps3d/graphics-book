@@ -114,7 +114,6 @@ class   MyWindow ( Window.RotationWindow ):
         self.shader.setTexture ( 'albedoMap', 0 )
         self.shader.setTexture ( 'mrMap',     1 )
         self.shader.setTexture ( 'normalMap', 2 )
-        self.idle ()
 
     def redisplay ( self ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )
