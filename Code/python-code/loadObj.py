@@ -1,8 +1,8 @@
 import numpy as np
 import glm
-import mesh
+import Mesh
 
-def loadObj( filename ):
+def loadObj( filename, scale = 1.0 ):
     vert_coords   = []
     text_coords   = []
     norm_coords   = []
@@ -23,7 +23,7 @@ def loadObj( filename ):
             text_coords.append(values[1:3])
         elif values[0] == 'vn':
             norm_coords.append(values[1:4])
-        elif values[0] == 'f':
+        elif values[0] == 'f':		# f v0/t0/n0 v1/t1/n1 v2/t2/n2
             face_i = []
             text_i = []
             norm_i = []
@@ -36,22 +36,33 @@ def loadObj( filename ):
             texture_index.append ( text_i )
             normal_index.append  ( norm_i )
 
-    vertex_index  = [y for x in vertex_index  for y in x]
-    texture_index = [y for x in texture_index for y in x]
-    normal_index  = [y for x in normal_index  for y in x]
-'''
-    for i in self.vertex_index:
-        self.model.extend(self.vert_coords[i])
+    vertices = []		# keep here pos, tex, normal
+    index    = dict ()	# map (pos,tex,normal) into index in vertices
+    faces    = []		# face indices
+	
+    for i in range(len(vertex_index)):
+        for j in range(3):
+            vi = vert_coords[vertex_index  [i][j]]
+            ti = text_coords[texture_index [i][j]]
+            ni = norm_coords[normal_index  [i][j]]
+            vertex = ( float(vi[0]), float(vi [1]), float(vi[2]), float(ti[0]), float(ti[1]), float(ni[0]), float(ni[1]), float(ni[2]) )
+            if vertex in index:		# we already have this key, use it's index
+                k = index [vertex]
+            else:					# new vertex
+                k = len(vertices)
+                index[vertex] = k
+				
+                vertices.append ( vertex )
 
-    for i in self.texture_index:
-        self.model.extend(self.text_coords[i])
+            faces.append ( k )
+		
+    mesh = Mesh.Mesh ()
+    for v in vertices:
+       #print ( '--v---', type(v), v )
+       mesh.addVertex ( scale * glm.vec3 ( v[0], v[1], v[2] ), glm.vec2 ( v[3], v[4] ), glm.vec3 ( v[5], v[6], v [7] ) )
+		
+    for i in range(len(faces) // 3):
+       mesh.addFace ( faces[3*i], faces[3*i + 1], faces [3*i + 2] )
 
-    for i in self.normal_index:
-        self.model.extend(self.norm_coords[i])
-
-    self.model = np.array(self.model, dtype='float32')
-'''
-    m = mesh.Mesh ()
-    
-    
-    return m
+    mesh.create ()		
+    return mesh
