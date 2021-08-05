@@ -1,11 +1,7 @@
-import math
-import glm
 import numpy
 from OpenGL.GL import *
 import Window
 import Program
-import Texture
-import Mesh
 
 vertices = [
 	-1.0, -1.0, 0.0,
@@ -18,7 +14,7 @@ class   MyWindow ( Window.Window ):
         super().__init__ ( w, h, t )
 
         self.vao = glGenVertexArrays(1)
-        self.vbo = glGenBuffers(1)     
+        self.vbo = glGenBuffers(1)
         glBindVertexArray ( self.vao )
         glBindBuffer      ( GL_ARRAY_BUFFER, self.vbo )
         glBufferData      ( GL_ARRAY_BUFFER, 4 * len(vertices), numpy.array ( vertices, dtype = numpy.float32), GL_STATIC_DRAW )
@@ -37,14 +33,7 @@ class   MyWindow ( Window.Window ):
 
 def main():
     win = MyWindow ( 900, 900, "Render triangle" )
-
-    if not win:
-        glfw.terminate()
-        return
-
     win.run ()
 
 if __name__ == "__main__":
     main()
-
-

@@ -1,10 +1,8 @@
 import math
 import glm
-import numpy
 from OpenGL.GL import *
 import Window
 import Program
-import Texture
 import Mesh
 
 class   MyWindow ( Window.RotationWindow ):
@@ -43,14 +41,7 @@ class   MyWindow ( Window.RotationWindow ):
 
 def main():
     win = MyWindow ( 900, 900, "Cook-Torrance shading model" )
-
-    if not win:
-        glfw.terminate()
-        return
-
     win.run ()
 
 if __name__ == "__main__":
     main()
-
-

@@ -1,4 +1,6 @@
-import numpy as np
+"""
+    loadObj - module to load .obj geometry files into Mesh objects to be rendered
+"""
 import glm
 import Mesh
 
@@ -9,12 +11,12 @@ def loadObj( filename, scale = 1.0 ):
     vertex_index  = []
     texture_index = []
     normal_index  = []
-    
+
     for line in open(filename, 'r'):
-        if line.startswith('#'): 
+        if line.startswith('#'):
             continue
         values = line.split()
-        if not values: 
+        if not values:
             continue
 
         if values[0] == 'v':
@@ -39,7 +41,7 @@ def loadObj( filename, scale = 1.0 ):
     vertices = []		# keep here pos, tex, normal
     index    = dict ()	# map (pos,tex,normal) into index in vertices
     faces    = []		# face indices
-	
+
     for i in range(len(vertex_index)):
         for j in range(3):
             vi = vert_coords[vertex_index  [i][j]]
@@ -51,18 +53,18 @@ def loadObj( filename, scale = 1.0 ):
             else:					# new vertex
                 k = len(vertices)
                 index[vertex] = k
-				
+
                 vertices.append ( vertex )
 
             faces.append ( k )
-		
+
     mesh = Mesh.Mesh ()
     for v in vertices:
-       #print ( '--v---', type(v), v )
-       mesh.addVertex ( scale * glm.vec3 ( v[0], v[1], v[2] ), glm.vec2 ( v[3], v[4] ), glm.vec3 ( v[5], v[6], v [7] ) )
-		
-    for i in range(len(faces) // 3):
-       mesh.addFace ( faces[3*i], faces[3*i + 1], faces [3*i + 2] )
+        #print ( '--v---', type(v), v )
+        mesh.addVertex ( scale * glm.vec3 ( v[0], v[1], v[2] ), glm.vec2 ( v[3], v[4] ), glm.vec3 ( v[5], v[6], v [7] ) )
 
-    mesh.create ()		
+    for i in range(len(faces) // 3):
+        mesh.addFace ( faces[3*i], faces[3*i + 1], faces [3*i + 2] )
+
+    mesh.create ()
     return mesh

@@ -1,3 +1,7 @@
+"""
+    Wrapper for mesh to be rendered by OpenGL
+"""
+
 import math
 import numpy
 import glm
@@ -21,7 +25,7 @@ class    Mesh:
         self.vertices.append ( normal.x )
         self.vertices.append ( normal.y )
         self.vertices.append ( normal.z )
-        
+
         if tangent is None:
             self.vertices.append ( 0 )
             self.vertices.append ( 0 )
@@ -30,7 +34,7 @@ class    Mesh:
             self.vertices.append ( tangent.x )
             self.vertices.append ( tangent.y )
             self.vertices.append ( tangent.z )
-       
+
         if binormal is None:
             self.vertices.append ( 0 )
             self.vertices.append ( 0 )
@@ -44,7 +48,7 @@ class    Mesh:
         self.indices.append ( v1 )
         self.indices.append ( v2 )
         self.indices.append ( v3 )
-        
+
     # return for vertex index tuple (pos, tex, n, t, b)
     def getVertex ( self, index ):
         i = index * 14
@@ -93,10 +97,10 @@ class    Mesh:
         y2          = pos.y + size.y
         z2          = pos.z + size.z
         ns          = -1.0 if invertNormal else 1.0
-        numVertices = 4*6            # 4 vertices per each face
-        numTris     = 6*2           # 2 tris per face
+        #numVertices = 4*6            # 4 vertices per each face
+        #numTris     = 6*2           # 2 tris per face
         mesh        = Mesh ()
-             
+
                                     # front face
         mesh.addVertex ( pos,                           glm.vec2 ( 0, 0 ),             glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
         mesh.addVertex ( glm.vec3 ( x2, pos.y, z2 ),    glm.vec2 ( size.x, 0 ),        glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
@@ -137,11 +141,11 @@ class    Mesh:
             mesh.addFace ( face * 4,     face * 4 + 1, face * 4 + 2 )
             mesh.addFace ( face * 4 + 2, face * 4 + 3, face * 4     )
 
-        if mat != None:
+        if mat is not None:
             pass
-               
+
         mesh.create ()
-        
+
         return mesh
 
     @classmethod
@@ -150,42 +154,41 @@ class    Mesh:
             r   = 1.8 + 0.8 * math.cos ( 3*t )
             phi = 0.2 * math.pi * math.sin ( 3*t )
             return r * glm.vec3 ( math.cos ( phi ) * math.sin ( 2*t ), math.cos ( phi ) * math.cos ( 2*t ), math.sin ( phi ) )
-            
+
         def knot ( u, v ):
             t = glm.normalize ( knot1D ( u + 0.01 ) - knot1D ( u - 0.01 ) )
             b = glm.normalize ( glm.cross ( t, glm.vec3 ( 0, 0, 1 ) ) )
             n = glm.cross ( t, b )
-            
+
             n = math.sin ( v ) * b + math.cos ( v ) * n
             b = glm.cross ( n, t )
-            
+
             return ( knot1D ( u ) + 0.6 * n, n, t, b )
-        
+
         ringDelta   = 2.0 * math.pi / rings
         sideDelta   = 2.0 * math.pi / sides
         invRings    = 1.0 / rings
         invSides    = 1.0 / sides
-        numVertices = (sides+1)*(rings+1)
-        numTris     = sides * rings * 2
+        #numVertices = (sides+1)*(rings+1)
+        #numTris     = sides * rings * 2
         mesh        = Mesh ()
-        
+
         for i in range ( rings + 1 ):
             phi = i * ringDelta
             for j in range ( sides + 1 ):
                 psi = j * sideDelta
-                
+
                 pos, n, t, b = knot ( phi, psi )
-                
+
                 mesh.addVertex ( pos, glm.vec2 ( j * invSides, i * invRings ), n, t, b )
-                
+
         for i in range ( rings  ):
             for j in range ( sides ):
                 i1 = i + 1
                 j1 = j + 1
                 mesh.addFace ( i*(sides+1) + j, i1*(sides+1) + j,  i1*(sides+1) + j1 )
                 mesh.addFace ( i*(sides+1) + j, i1*(sides+1) + j1, i*(sides+1) + j1 )
-        
-        mesh.create ()
-        
-        return mesh
 
+        mesh.create ()
+
+        return mesh

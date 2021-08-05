@@ -1,6 +1,4 @@
-import math
 import numpy
-import glm
 from OpenGL.GL import *
 
 class    Screen:
@@ -20,7 +18,7 @@ class    Screen:
         self.vertices.append ( y )
         self.vertices.append ( s )
         self.vertices.append ( t )
-        
+
     def create ( self ):
         self.vao = glGenVertexArrays ( 1 )
         glBindVertexArray ( self.vao )
@@ -35,4 +33,3 @@ class    Screen:
     def render ( self ):
         glBindVertexArray ( self.vao )
         glDrawArrays      ( GL_TRIANGLE_STRIP, 0, 4 )
-

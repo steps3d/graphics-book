@@ -8,8 +8,8 @@ from PIL import Image
 
 class    Texture:
     def __init__ ( self, filename ):
-        self.id       = glGenTextures ( 1 )
         self.filename = filename
+        self.id       = glGenTextures ( 1 )
         self.target   = GL_TEXTURE_2D
         glBindTexture ( self.target, self.id )
         # Set the texture wrapping parameters
@@ -20,7 +20,7 @@ class    Texture:
         glTexParameteri ( self.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
         # load image
         image       = Image.open ( filename )
-        print ( 'Image:', filename, image.mode )
+        #print ( 'Image:', filename, image.mode )
         if image.mode == 'L':			# handle paletted images
             image = image.convert ( mode = 'RGB' )
 			

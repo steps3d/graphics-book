@@ -1,11 +1,8 @@
 import math
 import glm
-import numpy
 from OpenGL.GL import *
 import Window
 import Program
-import Texture
-import Mesh
 import loadObj
 
 class   MyWindow ( Window.RotationWindow ):
@@ -44,25 +41,9 @@ class   MyWindow ( Window.RotationWindow ):
         self.eye += glm.vec3 ( 0.1 * ( 1 if dy >= 0 else -1 ) )
         self.reshape ( self.width, self.height )
 
-    def idle ( self ):
-        angle = 4 * self.time ()
-        self.light = glm.vec3 ( 8*math.cos(angle), 8*math.sin(1.4*angle), 8+0.5*math.sin (angle/3) )
-        self.shader.setUniformVec ( "eye",   self.eye   )
-        self.shader.setUniformVec ( "light", self.light )
-
-
 def main():
     win = MyWindow ( 900, 900, "Anisotropic shading model" )
-
-    if not win:
-        glfw.terminate()
-        return
-
-
-
     win.run ()
 
 if __name__ == "__main__":
     main()
-
-

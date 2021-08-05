@@ -1,6 +1,10 @@
+"""
+    Wrapper for OpenGL shader program.
+    Can load from separate shader files or a composite .glsl file
+"""
+
 from OpenGL.GL import *
 import OpenGL.GL.shaders
-import numpy
 import glm
 
 class    Program:
@@ -12,16 +16,16 @@ class    Program:
             self.fragmentShader = self.compileShader ( kwargs["fragment"], GL_FRAGMENT_SHADER )
             shaders             = [self.vertexShader, self.fragmentShader]
             if "geometry" in kwargs:
-                self.geometryShader = self.compileShader ( kwargs["geometry"], GL_GEOMETRY_SHADER ) 
+                self.geometryShader = self.compileShader ( kwargs["geometry"], GL_GEOMETRY_SHADER )
                 shaders.append ( self.geometryShader )
             else:
                 self.geometryShader = 0
-            
+
         self.program = OpenGL.GL.shaders.compileProgram ( *shaders )
         assert self.program > 0, "Invalid program"
 
     def loadFromComposite ( self, filename ):
-        data = dict ()                  # shader type to GL type and source       
+        data = dict ()                  # shader type to GL type and source
         curr = None                     # no active type
         with open ( filename ) as file:
             for line in file:
@@ -30,39 +34,32 @@ class    Program:
                     assert curr in ("vertex", "fragment", "geometry"), "Invalid shader type"
                     data [curr] = ''
                 else:
-                    assert curr != None, "Missing shader type"
+                    assert curr is not None, "Missing shader type"
                     data [curr] = data [curr] + line
-        
-        #print ( data['vertex'] )
-        #print ( data ['fragment'] )
 
         self.vertexShader   = self.compileShaderSource ( data ["vertex"],   GL_VERTEX_SHADER   )
         self.fragmentShader = self.compileShaderSource ( data ["fragment"], GL_FRAGMENT_SHADER )
         return [self.vertexShader, self.fragmentShader]
 
-        
     def compileShaderSource ( self, source, shaderType ):
         source = str.encode ( source )
         return OpenGL.GL.shaders.compileShader ( source, shaderType )
-    
+
     def compileShader ( self, fileName, shaderType ):
-        source = ""
+        #source = ""
         with open ( fileName ) as file:
             source = file.read()
-        #file.close ()
         return self.compileShaderSource ( source, shaderType )
-        #source = str.encode ( source )
-        #return OpenGL.GL.shaders.compileShader ( source, shaderType )
 
     def use ( self ):
         glUseProgram ( self.program )
 
     def __enter__ ( self ):
         glUseProgram ( self.program )
-        
-    def __exit__(self, type, value, tb):
+
+    def __exit__(self, tp, value, tb):
         glUseProgram ( 0 )
-       
+
     def setTexture ( self, name, unit ):
         #assert self.program > 0, "Invalid program"
         loc = glGetUniformLocation ( self.program, name )
@@ -74,15 +71,13 @@ class    Program:
     def setUniformFloat ( self, name, value ):
         loc = glGetUniformLocation ( self.program, name )
         #assert loc >=0, f"Uniform {name} not found"
-
         glUniform1f(loc, value)
-    
+
     def setUniformInt ( self, name, value ):
         loc = glGetUniformLocation ( self.program, name )
         #assert loc >=0, f"Uniform {name} not found"
-
         glUniform1i(loc, value)
-   
+
     def setUniformVec ( self, name, value ):
         loc = glGetUniformLocation ( self.program, name )
         #assert loc >=0, f"Uniform {name} not found"
@@ -113,4 +108,3 @@ class    Program:
             glUniformMatrix2fv ( loc, 1, GL_TRUE if transpose else GL_FALSE, value.to_tuple() )
         else:
             assert True, f"Invalid matrix type {type(value)}"
-

@@ -1,6 +1,4 @@
-import math
 import glm
-import numpy
 from OpenGL.GL import *
 import Window
 import Program
@@ -14,16 +12,16 @@ class   MyWindow ( Window.RotationWindow ):
         self.lightDir  = glm.vec3 ( -1, 1, 1 )
         self.shader    = Program.Program ( glsl = "pbr.glsl" )
         self.mesh      = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
-        self.albedo    = Texture.Texture ( 'rusted_iron/albedo.png' ) 
-        self.metalness = Texture.Texture ( 'rusted_iron/metallic.png' ) 
-        self.normal    = Texture.Texture ( 'rusted_iron/normal.png' ) 
-        self.roughness = Texture.Texture ( 'rusted_iron/roughness.png' ) 
-		
+        self.albedo    = Texture.Texture ( 'rusted_iron/albedo.png' )
+        self.metalness = Texture.Texture ( 'rusted_iron/metallic.png' )
+        self.normal    = Texture.Texture ( 'rusted_iron/normal.png' )
+        self.roughness = Texture.Texture ( 'rusted_iron/roughness.png' )
+
         self.albedo.bind    ( 0 )
         self.metalness.bind ( 1 )
         self.normal.bind    ( 2 )
         self.roughness.bind ( 3 )
-		
+
         self.shader.use ()
         self.shader.setUniformVec ( "lightDir",   glm.vec3 ( -1, 1, 1 ) )
         self.shader.setTexture    ( "albedoMap",     0 )
@@ -36,33 +34,21 @@ class   MyWindow ( Window.RotationWindow ):
         glClear      ( GL_COLOR_BUFFER_BIT + GL_DEPTH_BUFFER_BIT )
         glEnable     ( GL_DEPTH_TEST )
 
-        self.shader.setUniformMat ( "mv", self.getRotation () )
-        self.shader.setUniformMat ( "nm", self.normalMatrix ( self.getRotation () ) )
+        self.shader.setUniformMat ( "mv",  self.getRotation () )
+        self.shader.setUniformMat ( "nm",  self.normalMatrix ( self.getRotation () ) )
+        self.shader.setUniformVec ( "eye", self.eye   )
         self.mesh.render          ()
 
     def reshape ( self, width, height ):
         super().reshape ( width, height )
         self.shader.setUniformMat ( "proj",  self.getProjection () )
-        #self.shader.setUniformVec ( "eye",   self.eye )
-        #self.shader.setUniformVec ( "light", self.light )
 
     def mouseScroll ( self, dx, dy ):
         self.eye += glm.vec3 ( 0.1 * ( 1 if dy >= 0 else -1 ) )
         self.reshape ( self.width, self.height )
 
-    def idle ( self ):
-        angle = 4 * self.time ()
-        self.light = glm.vec3 ( 8*math.cos(angle), 8*math.sin(1.4*angle), 8+0.5*math.sin (angle/3) )
-        self.shader.setUniformVec ( "eye",   self.eye   )
-        #self.shader.setUniformVec ( "light", self.light )
-
 def main():
     win = MyWindow ( 900, 900, "Physically Based Rendering (PBR)" )
-
-    if not win:
-        glfw.terminate()
-        return
-
     win.run ()
 
 if __name__ == "__main__":

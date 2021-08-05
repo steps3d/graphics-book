@@ -36,14 +36,8 @@ class   MyWindow ( Window.RotationWindow ):
 
 def main():
     win = MyWindow ( 900, 900, "Textured example" )
-
-    if not win:
-        glfw.terminate()
-        return
-
     win.run ()
 
 if __name__ == "__main__":
     main()
-
 
