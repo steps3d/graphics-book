@@ -162,8 +162,8 @@ class Window:
         glReadBuffer    ( GL_FRONT )
         pixels = glReadPixels    ( 0, 0, self.width, self.height, \
                                    GL_RGB, GL_UNSIGNED_BYTE )
-        image = Image.fromstring ( "RGB", (self.width, self.height), pixels )
-        image = image.transpose  ( Image.FLIP_TOP_BOTTOM )
+        image = Image.frombytes ( "RGB", (self.width, self.height), pixels )
+        image = image.transpose ( Image.FLIP_TOP_BOTTOM )
         image.save ( filename )
 
     def run ( self ):
