@@ -36,12 +36,7 @@ void main( void )
 					// resulting color
 	vec4  ct   = f*(0.25 * d * g / nv);
 	float diff = max(nl, 0.0);
-	float ks   = 0.5;
+	//float ks   = 0.5;
 
-	color = diff * clr + ks * ct;
-//color = vec4 ( nv );
-//color = vec4 ( f );
-//color = vec4 ( d );
-//color = vec4 ( g );
-//color = vec4 ( g / nv );
+	color = (vec4(1)-f)*diff * clr + ct;
 }

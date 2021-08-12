@@ -10,21 +10,18 @@ import Mesh
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
-        self.eye   = glm.vec3 ( -8, 0, 0 )
-        self.light = glm.vec3 ( 9, 9, 9 )
-        self.kd    = 0.8
-        self.ka    = 0.2
-        self.ks    = 0.2
-
-        self.shader    = Program.Program ( glsl = "bumpmapping.glsl" )
+        self.eye       = glm.vec3 ( -8, 0, 0 )
+        self.light     = glm.vec3 ( 9, 9, 9 )
+        self.kd        = 0.8
+        self.ka        = 0.2
+        self.ks        = 0.2
         self.mesh      = Mesh.Mesh.createKnot ( 1, 1, 120, 30 )
         self.normalTex = Texture.Texture ( '../../Textures/Bumpmaps/FieldStone-DOT3.tga' )
         self.colorTex  = Texture.Texture ( '../../Textures/brick.tga' )
-        self.colorTex.bind ( 0 )
-        self.normalTex.bind ( 1 )
-        print ( 'COLOR', self.colorTex )
-        print ( 'NORMAL', self.normalTex )
-        self.shader.use ()
+        self.shader    = Program.Program ( glsl = "bumpmapping.glsl" )
+        self.colorTex.bind     ( 0 )
+        self.normalTex.bind    ( 1 )
+        self.shader.use        ()
         self.shader.setTexture ( 'colorMap',  0 )
         self.shader.setTexture ( 'bumpMap', 1 )
 
@@ -35,7 +32,7 @@ class   MyWindow ( Window.RotationWindow ):
 
         self.shader.setUniformMat ( "mv",       self.getRotation () )
         self.shader.setUniformMat ( "nm",       self.normalMatrix ( self.getRotation () ) )
-        self.mesh.render()
+        self.mesh.render ()
 
     def reshape ( self, width, height ):
         super().reshape ( width, height )
@@ -51,21 +48,16 @@ class   MyWindow ( Window.RotationWindow ):
         self.reshape ( self.width, self.height )
 
     def idle ( self ):
-        angle = 4 * self.time ()
+        angle      = 4 * self.time ()
         self.light = glm.vec3 ( 10*math.cos(angle), 10*math.sin(1.4*angle), 10+0.5*math.sin (angle/3) )
         self.shader.setUniformVec ( "eye",   self.eye   )
         self.shader.setUniformVec ( "light", self.light )
 
 def main():
     win = MyWindow ( 900, 900, "Blinn-Phong shading model" )
-
-    if not win:
-        glfw.terminate()
-        return
-
     win.run ()
 
 if __name__ == "__main__":
-    main()
+    main ()
 
 

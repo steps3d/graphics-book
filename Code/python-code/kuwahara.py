@@ -8,9 +8,9 @@ class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
         self.radius   = 5
-        self.shader   = Program.Program ( glsl = "kuwahara.glsl" )
         self.mesh     = Screen.Screen ()
         self.image    = Texture.Texture ( 'hotel.jpg' )
+        self.shader   = Program.Program ( glsl = "kuwahara.glsl" )
         self.shader.use ()
         self.image.bind ( 0 )
         self.shader.setTexture    ( "image", 0 )

@@ -10,9 +10,9 @@ import Mesh
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
-        self.shader    = Program.Program ( vertex = "textured.vsh", fragment = "textured.fsh" )
         self.mesh      = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
         self.texture   = Texture.Texture ( '../../Textures/block.jpg' ) 
+        self.shader    = Program.Program ( vertex = "textured.vsh", fragment = "textured.fsh" )
 		
         self.texture.bind       ( 0 )
         self.shader.use         ()

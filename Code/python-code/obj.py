@@ -13,9 +13,8 @@ class   MyWindow ( Window.RotationWindow ):
         self.kd       = 0.8
         self.ka       = 0.2
         self.ks       = 0.2
-
-        self.shader   = Program.Program ( glsl = "blinn-phong.glsl" )
         self.mesh     = loadObj.loadObj ( '../../Models/dragon.obj', scale = 20 )
+        self.shader   = Program.Program ( glsl = "blinn-phong.glsl" )
         self.shader.use ()
 
     def redisplay ( self ):

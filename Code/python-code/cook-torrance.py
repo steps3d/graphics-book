@@ -10,8 +10,8 @@ class   MyWindow ( Window.RotationWindow ):
         super().__init__ ( w, h, t )
         self.eye      = glm.vec3 ( -7, 0, 0 )
         self.light    = glm.vec3 ( -1, 1, 1 )
-        self.shader   = Program.Program ( vertex = "cook-torrance.vsh", fragment = "cook-torrance.fsh" )
         self.mesh     = Mesh.Mesh.createKnot ( 1, 1, 120, 30 )
+        self.shader   = Program.Program ( vertex = "cook-torrance.vsh", fragment = "cook-torrance.fsh" )
         self.shader.use ()
 
     def redisplay ( self ):
@@ -21,7 +21,7 @@ class   MyWindow ( Window.RotationWindow ):
 
         self.shader.setUniformMat ( "mv",       self.getRotation () )
         self.shader.setUniformMat ( "nm",       self.normalMatrix ( self.getRotation () ) )
-        self.mesh.render()
+        self.mesh.render ()
 
     def reshape ( self, width, height ):
         super().reshape ( width, height )
@@ -34,7 +34,7 @@ class   MyWindow ( Window.RotationWindow ):
         self.reshape ( self.width, self.height )
 
     def idle ( self ):
-        angle = 4 * self.time ()
+        angle      = 4 * self.time ()
         self.light = glm.vec3 ( 8*math.cos(angle), 8*math.sin(1.4*angle), 8+0.5*math.sin (angle/3) )
         self.shader.setUniformVec ( "eye",   self.eye   )
         self.shader.setUniformVec ( "light", self.light )

@@ -3,6 +3,8 @@
 """
 
 import sys
+import os
+import os.path
 import glfw
 import glm
 from OpenGL.GL import *
@@ -61,11 +63,16 @@ class Window:
             glfw.window_hint ( glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE )
             glfw.window_hint ( glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE )
 
-        self.window = glfw.create_window(w, h, title, None, None)
-        self.width  = w
-        self.height = h
-        self.title  = title
+        self.window          = glfw.create_window ( w, h, title, None, None )
+        self.width           = w
+        self.height          = h
+        self.title           = title
         self.screenshotCount = 1
+        self.screenshotName  = 'screeshot'
+
+        if len ( sys.argv ) > 0:
+            self.screenshotName = os.path.splitext ( os.path.basename ( sys.argv [0] ) ) [0]
+            print ( 'Set screenshot name to', self.screenshotName )
 
         if not self.window:
             glfw.terminate()
@@ -88,8 +95,13 @@ class Window:
         glViewport ( 0, 0, width, height )
 
     def key ( self, key, scancode, action, mods ):
-        if key in (256, 81, 113):        # Esc or q or Q
+        if key in (glfw.KEY_ESCAPE, 81, 113):        # Esc or q or Q
             glfw.set_window_should_close ( self.window, glfw.TRUE )
+        elif key == glfw.KEY_F1 and action == glfw.PRESS:
+            screenshotName = f'{self.screenshotName}-{self.screenshotCount}.png'
+            self.screenshotCount += 1
+            self.makeScreenshot ( screenshotName )
+            print ( 'Created screenshot', screenshotName )
 
     def mouseMove ( self, x, y ):
         pass
@@ -134,7 +146,7 @@ class Window:
     def setPos ( self, x, y ):
         glfw.set_window_pos ( self.window, x, y )
 
-    def setTitle ( self, title ):
+    def setCaption ( self, title ):
         self.title = title
         glfw.set_window_title ( self.window, title )
 
@@ -148,11 +160,11 @@ class Window:
         glPixelStorei   ( GL_PACK_ALIGNMENT, 1 )           # set 1-byte alignment
         glFinish        ()
         glReadBuffer    ( GL_FRONT )
-        pixels = glReadPixels    ( 0, 0, self.getWidth (), self.getHeight(), \
+        pixels = glReadPixels    ( 0, 0, self.width, self.height, \
                                    GL_RGB, GL_UNSIGNED_BYTE )
-        image = Image.fromstring("RGB", (self.width, self.height), pixels)
-        image = image.transpose( Image.FLIP_TOP_BOTTOM)
-        image.save(filename)
+        image = Image.fromstring ( "RGB", (self.width, self.height), pixels )
+        image = image.transpose  ( Image.FLIP_TOP_BOTTOM )
+        image.save ( filename )
 
     def run ( self ):
         self.reshape ( self.width, self.height )           # it's not called before 1st render

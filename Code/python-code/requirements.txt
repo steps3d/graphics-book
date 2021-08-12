@@ -1,0 +1,6 @@
+pyopengl 
+glfw 
+pyglm 
+pillow 
+numpy-stl
+pygltf

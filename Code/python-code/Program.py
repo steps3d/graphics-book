@@ -8,6 +8,9 @@ import OpenGL.GL.shaders
 import glm
 
 class    Program:
+    types = {"vertex" : GL_VERTEX_SHADER, "fragment" : GL_FRAGMENT_SHADER, "geometry": GL_GEOMETRY_SHADER, 
+            "tesscontrol": GL_TESS_CONTROL_SHADER, "tesseval": GL_TESS_EVALUATION_SHADER, "compute": GL_COMPUTE_SHADER}
+			
     def __init__ ( self, **kwargs ):
         if "glsl" in kwargs:        # get all shaders from one file using -- syntax
             shaders = self.loadFromComposite ( kwargs ["glsl"] )
@@ -27,19 +30,28 @@ class    Program:
     def loadFromComposite ( self, filename ):
         data = dict ()                  # shader type to GL type and source
         curr = None                     # no active type
+		
         with open ( filename ) as file:
             for line in file:
                 if line.lstrip ().rstrip ().startswith ( "--" ):        # new shader startswith
                     curr = line.lstrip ().rstrip () [2:].lower ().split () [0]
-                    assert curr in ("vertex", "fragment", "geometry"), "Invalid shader type"
+                    assert curr in Program.types, "Invalid shader type"
                     data [curr] = ''
                 else:
                     assert curr is not None, "Missing shader type"
                     data [curr] = data [curr] + line
 
-        self.vertexShader   = self.compileShaderSource ( data ["vertex"],   GL_VERTEX_SHADER   )
-        self.fragmentShader = self.compileShaderSource ( data ["fragment"], GL_FRAGMENT_SHADER )
-        return [self.vertexShader, self.fragmentShader]
+        shaders = []
+		
+        for sh in data:
+            shader = self.compileShaderSource ( data [sh], Program.types [sh] )
+            shaders.append ( shader )
+            if sh == "vertex":
+                self.vertexShader = shader
+            elif sh == "fragment":
+                self.fragmentShader = shader
+		
+        return shaders
 
     def compileShaderSource ( self, source, shaderType ):
         source = str.encode ( source )
@@ -61,11 +73,7 @@ class    Program:
         glUseProgram ( 0 )
 
     def setTexture ( self, name, unit ):
-        #assert self.program > 0, "Invalid program"
         loc = glGetUniformLocation ( self.program, name )
-        #print ( self.program, loc, name )
-        #assert loc >=0, f"Uniform {name} not found"
-
         glUniform1i(loc, unit)
 
     def setUniformFloat ( self, name, value ):

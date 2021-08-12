@@ -12,9 +12,8 @@ class   MyWindow ( Window.RotationWindow ):
         self.kd       = 0.8
         self.ka       = 0.2
         self.ks       = 0.2
-
-        self.shader   = Program.Program ( glsl = "aniso.glsl" )
         self.mesh     = Mesh.Mesh.createKnot ( 1, 1, 120, 30 )
+        self.shader   = Program.Program ( glsl = "aniso.glsl" )
         self.shader.use ()
 
     def redisplay ( self ):
@@ -24,7 +23,7 @@ class   MyWindow ( Window.RotationWindow ):
 
         self.shader.setUniformMat ( "mv",       self.getRotation () )
         self.shader.setUniformMat ( "nm",       self.normalMatrix ( self.getRotation () ) )
-        self.mesh.render()
+        self.mesh.render ()
 
     def reshape ( self, width, height ):
         super().reshape ( width, height )

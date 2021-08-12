@@ -15,8 +15,11 @@ class    Mesh:
         self.vbo      = 0
         self.ibo      = 0
         self.stride   = 14 * 4      # 14 floats per vertex
+        self.min      = None		# bbox is undefined
+        self.max      = None		# bbox is undefined
 
     def addVertex ( self, pos, tex, normal, tangent = None, binormal = None ):
+        self.updateBox ( pos )
         self.vertices.append ( pos.x )
         self.vertices.append ( pos.y )
         self.vertices.append ( pos.z )
@@ -49,6 +52,25 @@ class    Mesh:
         self.indices.append ( v2 )
         self.indices.append ( v3 )
 
+    def updateBox ( self, p ):
+        if self.min is None:
+            self.min = p
+            self.max = p
+            return
+
+        if p.x < self.min.x:
+            self.min.x = p.x
+        if p.y < self.min.y:
+            self.min.y = p.y
+        if p.z < self.min.z:
+            self.min.z = p.z
+
+        if p.x > self.max.x:
+            self.max.x = p.x
+        if p.y > self.max.y:
+            self.max.y = p.y
+        if p.z < self.max.z:
+            self.max.z = p.z
     # return for vertex index tuple (pos, tex, n, t, b)
     def getVertex ( self, index ):
         i = index * 14

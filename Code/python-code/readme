@@ -1,0 +1,7 @@
+README file for python code
+
+In the file requirements.txt you will find all python requirements to 
+run this code.
+You will also need python >= 3.7
+
+Now there is no support for dds textures and many model formats.

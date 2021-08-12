@@ -1,97 +1,95 @@
 import os
 import os.path
-import math
 import glm
 import numpy
 from OpenGL.GL import *
-from pygltflib import GLTF2, Scene
+from pygltflib import GLTF2
 import Window
 import Program
 import Texture
 import Mesh
 
-	# map to numpy.array
+    # map to numpy.array
 def toArray ( blob, accessor, view, dtype, n ):
-	arr=numpy.frombuffer ( blob [view.byteOffset + accessor.byteOffset : view.byteOffset + view.byteLength], dtype = dtype, count = accessor.count * n )
-	return arr.reshape ((-1, n))
+    arr=numpy.frombuffer ( blob [view.byteOffset + accessor.byteOffset : view.byteOffset + view.byteLength], dtype = dtype, count = accessor.count * n )
+    return arr.reshape ((-1, n))
 
 def attrToArray ( gltf, blob, attr, n, dtype ):
-	accessor     = gltf.accessors[attr]
-	buffer_view  = gltf.bufferViews[accessor.bufferView]
-	return toArray ( blob, accessor, buffer_view, dtype = dtype, n = n )
-	
+    accessor     = gltf.accessors[attr]
+    buffer_view  = gltf.bufferViews[accessor.bufferView]
+    return toArray ( blob, accessor, buffer_view, dtype = dtype, n = n )
+
 def _toVec2 ( v ):
-	return glm.vec2 ( v[0], v[1] )
-	
+    return glm.vec2 ( v[0], v[1] )
+
 def _toVec3 ( v ):
-	return glm.vec3 ( v[0], v[1], v[2] )
-	
+    return glm.vec3 ( v[0], v[1], v[2] )
+
 def _loadFrom ( gltf, primitive ):
-	print ( 'Attributes: ', primitive.attributes )
-	blob      = gltf.binary_blob()
-	points    = attrToArray ( gltf, blob, primitive.attributes.POSITION,   3, dtype = "float32" )
-	normals   = attrToArray ( gltf, blob, primitive.attributes.NORMAL,     3, dtype = "float32" )
-	texCoords = attrToArray ( gltf, blob, primitive.attributes.TEXCOORD_0, 2, dtype = "float32" )
-	tangents  = attrToArray ( gltf, blob, primitive.attributes.TANGENT,    3, dtype = "float32" )
-	indices   = attrToArray ( gltf, blob, primitive.indices,               1, dtype = "uint16" ).flatten ()
+    print ( 'Attributes: ', primitive.attributes )
+    blob      = gltf.binary_blob()
+    points    = attrToArray ( gltf, blob, primitive.attributes.POSITION,   3, dtype = "float32" )
+    normals   = attrToArray ( gltf, blob, primitive.attributes.NORMAL,     3, dtype = "float32" )
+    texCoords = attrToArray ( gltf, blob, primitive.attributes.TEXCOORD_0, 2, dtype = "float32" )
+    tangents  = attrToArray ( gltf, blob, primitive.attributes.TANGENT,    3, dtype = "float32" )
+    indices   = attrToArray ( gltf, blob, primitive.indices,               1, dtype = "uint16" ).flatten ()
 
-	#return numpy.hstack ((points, texCoords, normals ))		# concat to array of (pos, tex, n)
+    #return numpy.hstack ((points, texCoords, normals ))		# concat to array of (pos, tex, n)
 
-	# or this way
-	m = Mesh.Mesh ()
-	for i in range ( len ( points ) ):
-		m.addVertex ( _toVec3(points [i])*100, _toVec2(texCoords [i]), _toVec3(normals [i]), _toVec3(tangents[i]))
-		
-	for i in range ( len ( indices ) // 3 ):
-		m.addFace ( indices [3*i], indices [3*i+1], indices [3*i+2] )
-		
-	m.create ()
-	return m
-	
+    # or this way
+    m = Mesh.Mesh ()
+    for i in range ( len ( points ) ):
+        m.addVertex ( _toVec3(points [i])*100, _toVec2(texCoords [i]), _toVec3(normals [i]), _toVec3(tangents[i]))
+
+    for i in range ( len ( indices ) // 3 ):
+        m.addFace ( indices [3*i], indices [3*i+1], indices [3*i+2] )
+
+    m.create ()
+    return m
+
 def loadGltf ( filename ):
-	gltf = GLTF2().load ( filename )
-	current_scene = gltf.scenes[gltf.scene]
-		# we may have to load binary blob manually
-	if gltf.binary_blob () is None:
-		if filename.endswith ( '.gltf'  ):
-			binFilename = filename [0:-5] + '.bin'
-			gltf.set_binary_blob ( open(binFilename, 'rb' ).read () )
-	
+    gltf = GLTF2().load ( filename )
+    current_scene = gltf.scenes[gltf.scene]
+        # we may have to load binary blob manually
+    if gltf.binary_blob () is None:
+        if filename.endswith ( '.gltf'  ):
+            binFilename = filename [0:-5] + '.bin'
+            gltf.set_binary_blob ( open(binFilename, 'rb' ).read () )
 
-	materials = []
-	for m in gltf.materials:
-		d = { 'name': m.name }
-		if m.pbrMetallicRoughness:
-			d ['color']             = m.pbrMetallicRoughness.baseColorTexture.index
-			d ['metallicRoughness'] = m.pbrMetallicRoughness.metallicRoughnessTexture.index
-		d ['normal'] = m.normalTexture.index
-		print ( d )
-		materials.append ( d )
-				
-	m = _loadFrom ( gltf, gltf.meshes[0].primitives[0] )
-	
-	m.textures  = []
-	m.materials = materials
+    materials = []
+    for m in gltf.materials:
+        d = { 'name': m.name }
+        if m.pbrMetallicRoughness:
+            d ['color']             = m.pbrMetallicRoughness.baseColorTexture.index
+            d ['metallicRoughness'] = m.pbrMetallicRoughness.metallicRoughnessTexture.index
+        d ['normal'] = m.normalTexture.index
+        print ( d )
+        materials.append ( d )
 
-	for i in range(len(gltf.accessors)):
-		acc = gltf.accessors [i]
-		if acc.min:
-			print ( 'min/max', acc.min, acc.max )
-			m.min = glm.vec3 ( acc.min )
-			m.max = glm.vec3 ( acc.max )
+    m = _loadFrom ( gltf, gltf.meshes[0].primitives[0] )
 
-	for t in gltf.images:
-		#print ( type(t), t )
-		uri = t.uri
-		m.textures.append ( Texture.Texture ( os.path.dirname(filename)+'/'+uri ) ) 
+    m.textures  = []
+    m.materials = materials
 
-	if len(m.materials) > 0:
-		m.colorTex  = m.textures [m.materials[0]['color']]
-		m.mrTex     = m.textures [m.materials[0]['metallicRoughness']]
-		m.normalTex = m.textures [m.materials[0]['normal']]
+    for i in range(len(gltf.accessors)):
+        acc = gltf.accessors [i]
+        if acc.min:
+            print ( 'min/max', acc.min, acc.max )
+            m.min = glm.vec3 ( acc.min )
+            m.max = glm.vec3 ( acc.max )
 
-	print ( m.textures )
-	return m
+    for t in gltf.images:
+        #print ( type(t), t )
+        uri = t.uri
+        m.textures.append ( Texture.Texture ( os.path.dirname(filename)+'/'+uri ) )
+
+    if len(m.materials) > 0:
+        m.colorTex  = m.textures [m.materials[0]['color']]
+        m.mrTex     = m.textures [m.materials[0]['metallicRoughness']]
+        m.normalTex = m.textures [m.materials[0]['normal']]
+
+    print ( m.textures )
+    return m
 
 #filename = 'glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb'
 #filename = 'beretta-m9/scene.gltf'
@@ -105,8 +103,8 @@ class   MyWindow ( Window.RotationWindow ):
         super().__init__ ( w, h, t )
         self.eye      = glm.vec3 ( -7, 0, 0 )
         self.lightDir = glm.vec3 ( -7, 0, 0 )
-        self.shader   = Program.Program ( glsl = "pbr-2.glsl" )
         self.mesh     = loadGltf ( filename )
+        self.shader   = Program.Program ( glsl = "pbr-2.glsl" )
         self.shader.use ()
         self.mesh.colorTex.bind  ( 0 )
         self.mesh.mrTex.bind     ( 1 )
@@ -140,14 +138,8 @@ class   MyWindow ( Window.RotationWindow ):
         self.shader.setUniformVec ( "eye",      self.eye   )
         self.shader.setUniformVec ( "lightDir", self.lightDir )
 
-
 def main():
     win = MyWindow ( 800, 600, "Loading GLTF model" )
-
-    if not win:
-        glfw.terminate()
-        return
-
     win.run ()
 
 if __name__ == "__main__":
