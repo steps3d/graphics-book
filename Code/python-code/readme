@@ -1,7 +1,9 @@
 README file for python code
 
 In the file requirements.txt you will find all python requirements to 
-run this code.
-You will also need python >= 3.7
+run this code. You will also need python >= 3.7.
+
+python -m pip intall -r requrements.txt
 
 Now there is no support for dds textures and many model formats.
+Added compute shader example.

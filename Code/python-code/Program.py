@@ -66,6 +66,12 @@ class    Program:
     def use ( self ):
         glUseProgram ( self.program )
 
+    def bind ( self ):
+        glUseProgram ( self.program )
+
+    def unbind ( self ):
+        glUseProgram ( 0 )
+
     def __enter__ ( self ):
         glUseProgram ( self.program )
 
@@ -89,6 +95,8 @@ class    Program:
     def setUniformVec ( self, name, value ):
         loc = glGetUniformLocation ( self.program, name )
         #assert loc >=0, f"Uniform {name} not found"
+        if loc < 0:
+            return
 
         if isinstance(value, glm.vec2):
             glUniform2fv(loc, 1, value.to_tuple())
@@ -107,7 +115,10 @@ class    Program:
     def setUniformMat ( self, name, value, transpose = False ):
         loc = glGetUniformLocation ( self.program, name )
         #assert loc >=0, f"Uniform {name} not found"
+        if loc < 0:
+            return
 
+        #print ( name, value )
         if isinstance(value, glm.mat4):
             glUniformMatrix4fv ( loc, 1, GL_TRUE if transpose else GL_FALSE, value.to_tuple() )
         elif isinstance(value, glm.mat3):
@@ -116,3 +127,18 @@ class    Program:
             glUniformMatrix2fv ( loc, 1, GL_TRUE if transpose else GL_FALSE, value.to_tuple() )
         else:
             assert True, f"Invalid matrix type {type(value)}"
+
+    def setAttrPtr ( self, name, numComponents, stride, offs, type = GL_FLOAT, normalized = False ):
+        loc = glGetUniformLocation ( self.program, name )
+        if loc < 0:
+            return
+			
+        glVertexAttribPointer ( loc, 					# index
+							numComponents, 				# number of values per vertex
+							type, 						# type (GL_FLOAT)
+							GL_TRUE if normalized else GL_FALSE,
+							stride, 					# stride (offset to next vertex data)
+							offs )
+		
+        glEnableVertexAttribArray ( loc )
+

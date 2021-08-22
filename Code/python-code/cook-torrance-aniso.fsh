@@ -11,7 +11,7 @@ out vec4 color;
 
 //const float roughness = 0.04;
 const float pi        = 3.1415926;
-const vec2  sigma     = vec2 ( 0.04, 5 );
+const vec2  sigma     = vec2 ( 0.02, 0.5 );
 
 float sqr ( in float x )
 {

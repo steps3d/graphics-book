@@ -165,4 +165,5 @@ void main ()
 	vec3 diff        = (vec3(1.0) - specFresnel) * nl / pi;
 
 	color = pow ( vec4 ( ( diff * mix ( base, vec3(0.0), metallness) + spec ) * lightColor, 1.0 ), vec4 ( 1.0 / gamma ) );
+//	color = vec4 ( ( diff * mix ( base, vec3(0.0), metallness) + spec ) * lightColor, 1.0 );
 }

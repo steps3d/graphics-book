@@ -3,8 +3,9 @@
 """
 
 from OpenGL.GL import *
-import OpenGL.GL.shaders
-import glm
+import numpy
+#import OpenGL.GL.shaders
+#import glm
 
 class    Buffer:
     def __init__ ( self, target, data ):
@@ -12,18 +13,24 @@ class    Buffer:
         self.id     = glGenBuffers ( 1 )
 
         glBindBuffer ( self.target, self.id )
-        glBufferData ( self.target, len(data), numpy.array(data, dtype = numpy.uint8), GL_STATIC_DRAW )
+        glBufferData ( self.target, 4*len(data), numpy.array(data, dtype = numpy.float32), GL_STATIC_DRAW )
+        print(self.id, len(data))
         assert self.id > 0, "Invalid buffer"
 
     def bind ( self, target = None ):
         if target is None:
-            target = self.type
-        glBindBuffer ( self.type, self.id )
+            target = self.target
+        glBindBuffer ( target, self.id )
+
+    def unbind ( self, target = None ):
+        if target is None:
+            target = self.target
+        glBindBuffer ( target, 0 )
 
     def bindBase ( self, target, index ):
         self.target = target
-        glBindBufferBase ( self.target, index, self.id )
+        glBindBufferBase ( target, index, self.id )
 
     def bindRange ( self, target, index, offset, size ):
         self.target = target
-        glBindBufferRange ( self.target, index, id, offset, size )
+        glBindBufferRange ( target, index, id, offset, size )

@@ -54,8 +54,8 @@ class    Mesh:
 
     def updateBox ( self, p ):
         if self.min is None:
-            self.min = p
-            self.max = p
+            self.min = glm.vec3 ( p )
+            self.max = glm.vec3 ( p )
             return
 
         if p.x < self.min.x:
@@ -71,6 +71,7 @@ class    Mesh:
             self.max.y = p.y
         if p.z < self.max.z:
             self.max.z = p.z
+
     # return for vertex index tuple (pos, tex, n, t, b)
     def getVertex ( self, index ):
         i = index * 14
@@ -97,17 +98,16 @@ class    Mesh:
         glEnableVertexAttribArray ( 1 )
 
         # normal
-        glVertexAttribPointer ( 2, 3, GL_FLOAT, GL_FALSE, 56, ctypes.c_void_p(20))
-        glEnableVertexAttribArray(2)
+        glVertexAttribPointer     ( 2, 3, GL_FLOAT, GL_FALSE, 56, ctypes.c_void_p(20))
+        glEnableVertexAttribArray ( 2 )
 
         # binormal
-        glVertexAttribPointer ( 3, 3, GL_FLOAT, GL_FALSE, 56, ctypes.c_void_p(32))
-        glEnableVertexAttribArray(3)
+        glVertexAttribPointer     ( 3, 3, GL_FLOAT, GL_FALSE, 56, ctypes.c_void_p(32))
+        glEnableVertexAttribArray ( 3 )
 
         # tangent
-        glVertexAttribPointer ( 4, 3, GL_FLOAT, GL_FALSE, 56, ctypes.c_void_p(44))
-        glEnableVertexAttribArray(4)
-        #print ( 'num vertices=', len(self.vertices)/14, 'num faces = ', len(self.indices)/3 )
+        glVertexAttribPointer     ( 4, 3, GL_FLOAT, GL_FALSE, 56, ctypes.c_void_p(44))
+        glEnableVertexAttribArray ( 4 )
 
     def render ( self ):
         glBindVertexArray ( self.vao )
