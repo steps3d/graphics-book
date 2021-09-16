@@ -7,7 +7,7 @@ in vec2 tx;
 
 out vec4 color;
 
-const float roughness = 0.09;
+const float roughness = 0.04;
 
 void main( void )
 {
@@ -36,7 +36,7 @@ void main( void )
 					// resulting color
 	vec4  ct   = f*(0.25 * d * g / nv);
 	float diff = max(nl, 0.0);
-	//float ks   = 0.5;
+	float ks   = 0.5;
 
-	color = (vec4(1)-f)*diff * clr + ct;
+	color = /*(vec4(1)-f)**/ diff * clr + ks * ct;
 }

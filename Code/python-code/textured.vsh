@@ -13,5 +13,5 @@ void main(void)
 	vec4 	p = mv * vec4 ( pos, 1.0 );
 	
 	gl_Position  = proj * p;
-	tx           = texCoord * vec2 ( 1, 6 );
+	tx           = texCoord;	// * vec2 ( 1, 6 );
 }

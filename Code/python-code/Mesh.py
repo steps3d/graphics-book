@@ -124,16 +124,16 @@ class    Mesh:
         mesh        = Mesh ()
 
                                     # front face
-        mesh.addVertex ( pos,                           glm.vec2 ( 0, 0 ),             glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
-        mesh.addVertex ( glm.vec3 ( x2, pos.y, z2 ),    glm.vec2 ( size.x, 0 ),        glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
-        mesh.addVertex ( glm.vec3 ( x2, y2, z2 ),       glm.vec2 ( size.x, size.y ),   glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
-        mesh.addVertex ( glm.vec3 ( pos.x, y2, z2 ),    glm.vec2 ( 0, size.y ),        glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( pos.x, pos.y, z2 ), glm.vec2 ( 0, 0 ),             glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    pos.y, z2 ), glm.vec2 ( size.x, 0 ),        glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    y2,    z2 ), glm.vec2 ( size.x, size.y ),   glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( pos.x, y2,    z2 ), glm.vec2 ( 0, size.y ),        glm.vec3 ( 0, 0, ns ), glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 1, 0 ) )
 
                                     # back face
-        mesh.addVertex ( glm.vec3 ( x2, pos.y, pos.z ), glm.vec2 ( size.x, 0 ),     glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
-        mesh.addVertex ( pos,                           glm.vec2 ( 0, 0 ),          glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
-        mesh.addVertex ( glm.vec3 ( pos.x, y2, pos.z ), glm.vec2 ( 0, size.x ),     glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
-        mesh.addVertex ( glm.vec3 ( x2, y2, pos.z ),    size,                       glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    pos.y, pos.z ), glm.vec2 ( size.x, 0 ),     glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( pos.x, pos.y, pos.z ), glm.vec2 ( 0, 0 ),          glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( pos.x, y2,    pos.z ), glm.vec2 ( 0, size.x ),     glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    y2,    pos.z ), size,                       glm.vec3 ( 0, 0, -ns ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, -1, 0 ) )
 
                                     # left face
         mesh.addVertex ( pos,                           glm.vec2 ( 0, 0 ),           glm.vec3 ( -ns, 0, 0 ), glm.vec3 ( 0, 0, -1 ), glm.vec3 ( 0, -1, 0 ) )
@@ -149,15 +149,15 @@ class    Mesh:
 
                                     # top face
         mesh.addVertex ( glm.vec3 ( pos.x, y2, z2 ),     glm.vec2 ( 0, size.z ),      glm.vec3 ( 0, ns, 0 ),  glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
-        mesh.addVertex ( glm.vec3 ( x2, y2, z2 ),        glm.vec2 ( size.x, size.z ), glm.vec3 ( 0, ns, 0 ),  glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
-        mesh.addVertex ( glm.vec3 ( x2, y2, pos.z ),     glm.vec2 ( size.x, 0 ),      glm.vec3 ( 0, ns, 0 ),  glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    y2, z2 ),     glm.vec2 ( size.x, size.z ), glm.vec3 ( 0, ns, 0 ),  glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    y2, pos.z ),  glm.vec2 ( size.x, 0 ),      glm.vec3 ( 0, ns, 0 ),  glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
         mesh.addVertex ( glm.vec3 ( pos.x, y2, pos.z ),  glm.vec2 ( 0, 0 ),           glm.vec3 ( 0, ns, 0 ),  glm.vec3 ( 1, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
 
                                     # bottom face
-        mesh.addVertex ( glm.vec3 ( x2, pos.y, z2 ),       glm.vec2 ( size.x, size.z ), glm.vec3 ( 0, -ns, 0 ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, 0, -1 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    pos.y, z2 ),    glm.vec2 ( size.x, size.z ), glm.vec3 ( 0, -ns, 0 ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, 0, -1 ) )
         mesh.addVertex ( glm.vec3 ( pos.x, pos.y, z2 ),    glm.vec2 ( 0, size.z ),      glm.vec3 ( 0, -ns, 0 ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, 0, -1 ) )
         mesh.addVertex ( glm.vec3 ( pos.x, pos.y, pos.z ), glm.vec2 ( 0, 0 ),           glm.vec3 ( 0, -ns, 0 ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, 0, -1 ) )
-        mesh.addVertex ( glm.vec3 ( x2, pos.y, pos.z ),    glm.vec2 ( size.x, 0 ),      glm.vec3 ( 0, -ns, 0 ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, 0, -1 ) )
+        mesh.addVertex ( glm.vec3 ( x2,    pos.y, pos.z ), glm.vec2 ( size.x, 0 ),      glm.vec3 ( 0, -ns, 0 ), glm.vec3 ( -1, 0, 0 ), glm.vec3 ( 0, 0, -1 ) )
 
         for face in range ( 6 ):
             mesh.addFace ( face * 4,     face * 4 + 1, face * 4 + 2 )

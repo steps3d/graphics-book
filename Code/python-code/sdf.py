@@ -10,7 +10,7 @@ class   MyWindow ( Window.RotationWindow ):
         super().__init__ ( w, h, t )
         self.eye      = glm.vec3 ( 0, 0, 3 )
         self.mesh     = Screen.Screen ()
-        self.shader   = Program.Program ( glsl = "sdf-3.glsl" )
+        self.shader   = Program.Program ( glsl = "sdf-6.glsl" )
         self.shader.use ()
         self.shader.setUniformVec ( "eye", self.eye )
 

@@ -51,7 +51,7 @@ class Window:
         if w:
             w.mouseScroll ( dx, dy )
 
-    def __init__ (self, w, h, title ):
+    def __init__ (self, w, h, title, fullScreen = False, depth = True, stencil = False, resizable = True ):
         if not Window.initialized:
             if not glfw.init():
                 print ( 'GLFW initialization error' )
@@ -63,12 +63,29 @@ class Window:
             glfw.window_hint ( glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE )
             glfw.window_hint ( glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE )
 
-        self.window          = glfw.create_window ( w, h, title, None, None )
+            glfw.window_hint ( glfw.RED_BITS,     8 )
+            glfw.window_hint ( glfw.GREEN_BITS,   8 )
+            glfw.window_hint ( glfw.BLUE_BITS,    8 )
+            glfw.window_hint ( glfw.ALPHA_BITS,   8 )
+            glfw.window_hint ( glfw.DEPTH_BITS,   24 if depth   else 0 )
+            glfw.window_hint ( glfw.STENCIL_BITS, 8  if stencil else 0 )
+            glfw.window_hint ( glfw.RESIZABLE,    GL_TRUE if resizable else GL_FALSE )
+
+        if fullScreen:
+            monitor     = glfw.get_primary_monitor ()
+            mode        = glfw.get_video_mode      ( monitor )
+            w           = mode.size.width
+            h           = mode.size.height
+            #self.window = glfw.create_window ( w, h, title, monitor, None )
+        else:
+            monitor     = None
+
+        self.window          = glfw.create_window ( w, h, title, monitor, None )
         self.width           = w
         self.height          = h
         self.title           = title
         self.screenshotCount = 1
-        self.screenshotName  = 'screeshot'
+        self.screenshotName  = 'screenshot'
 
         if len ( sys.argv ) > 0:
             self.screenshotName = os.path.splitext ( os.path.basename ( sys.argv [0] ) ) [0]
@@ -79,14 +96,14 @@ class Window:
             print('Could not create window')
             sys.exit ( 1 )
 
-        glfw.set_window_user_pointer(self.window, self)
-        glfw.make_context_current(self.window)
-        glfw.set_window_size_callback(self.window, Window.sizeCallback)
-        glfw.set_key_callback(self.window, Window.keyCallback)
-        glfw.set_cursor_pos_callback(self.window, Window.mouseMoveCallback)
-        glfw.set_cursor_enter_callback(self.window, Window.mouseEnterCallback)
-        glfw.set_mouse_button_callback(self.window, Window.mouseButtonCallback)
-        glfw.set_scroll_callback(self.window, Window.mouseScrollCallback)
+        glfw.set_window_user_pointer   ( self.window, self                       )
+        glfw.make_context_current      ( self.window                             )
+        glfw.set_window_size_callback  ( self.window, Window.sizeCallback        )
+        glfw.set_key_callback          ( self.window, Window.keyCallback         )
+        glfw.set_cursor_pos_callback   ( self.window, Window.mouseMoveCallback   )
+        glfw.set_cursor_enter_callback ( self.window, Window.mouseEnterCallback  )
+        glfw.set_mouse_button_callback ( self.window, Window.mouseButtonCallback )
+        glfw.set_scroll_callback       ( self.window, Window.mouseScrollCallback )
 
     def reshape ( self, width, height ):
         self.width  = width
@@ -176,8 +193,8 @@ class Window:
         glfw.terminate()
 
 class RotationWindow (Window):
-    def __init__ ( self, w, h, title ):
-        super().__init__ ( w, h, title )
+    def __init__ ( self, w, h, title, depth = True, stencil = False, resizable = True  ):
+        super().__init__ ( w, h, title, depth = depth, stencil = stencil, resizable = resizable )
         self.mouseOldX       = 0
         self.mouseOldY       = 0
         self.rot             = glm.vec3 ( 0, 0, 0 )

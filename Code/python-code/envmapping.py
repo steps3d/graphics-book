@@ -6,16 +6,15 @@ import Window
 import Program
 import Texture
 import Mesh
+import dds
 
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
-        #self.mesh    = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
-        self.mesh    = Mesh.Mesh.createBox ( glm.vec3 ( -1, -1, -1 ), glm.vec3 ( 2, 2, 2 ) )
-        self.texture = Texture.Texture ( '../../Textures/block.jpg' ) 
-        self.shader  = Program.Program ( vertex = "textured.vsh", fragment = "textured.fsh" )
-		
-        self.texture.bind       ( 0 )
+        self.mesh      = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
+        self.texture, target, w, h, d = dds.readDdsFile ( '../../Textures/Cubemaps/LobbyCube.dds' )
+        self.shader    = Program.Program ( glsl = "envmapping.glsl" )
+        glBindTexture ( GL_TEXTURE_CUBE_MAP, self.texture )
         self.shader.use         ()
         self.shader.setTexture  ( "image", 0 )
 
@@ -24,7 +23,9 @@ class   MyWindow ( Window.RotationWindow ):
         glClear      ( GL_COLOR_BUFFER_BIT + GL_DEPTH_BUFFER_BIT )
         glEnable     ( GL_DEPTH_TEST )
 
-        self.shader.setUniformMat ( "mv", self.getRotation () )
+        self.shader.setUniformMat ( "mv",  self.getRotation () )
+        self.shader.setUniformMat ( "nm",  self.normalMatrix ( self.getRotation () ) )
+        self.shader.setUniformVec ( "eye", self.eye )
         self.mesh.render()
 
     def reshape ( self, width, height ):
@@ -36,7 +37,7 @@ class   MyWindow ( Window.RotationWindow ):
         self.reshape ( self.width, self.height )
 
 def main():
-    win = MyWindow ( 900, 900, "Textured example" )
+    win = MyWindow ( 900, 900, "Environmapped knot" )
     win.run ()
 
 if __name__ == "__main__":

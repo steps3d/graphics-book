@@ -5,5 +5,5 @@ run this code. You will also need python >= 3.7.
 
 python -m pip intall -r requrements.txt
 
-Now there is no support for dds textures and many model formats.
 Added compute shader example.
+Added partial support for 2D and cubemap DDS textures

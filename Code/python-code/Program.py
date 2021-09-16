@@ -80,6 +80,7 @@ class    Program:
 
     def setTexture ( self, name, unit ):
         loc = glGetUniformLocation ( self.program, name )
+        #assert loc >=0, f"Uniform {name} not found"
         glUniform1i(loc, unit)
 
     def setUniformFloat ( self, name, value ):

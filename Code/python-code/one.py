@@ -11,7 +11,7 @@ vertices = [
 
 class   MyWindow ( Window.Window ):
     def __init__ ( self, w, h, t ):
-        super().__init__ ( w, h, t )
+        super().__init__ ( w, h, t, fullScreen = True )
 
         self.vao = glGenVertexArrays(1)
         self.vbo = glGenBuffers(1)

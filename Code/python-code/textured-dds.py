@@ -6,16 +6,16 @@ import Window
 import Program
 import Texture
 import Mesh
+import dds
 
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
         super().__init__ ( w, h, t )
-        #self.mesh    = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
-        self.mesh    = Mesh.Mesh.createBox ( glm.vec3 ( -1, -1, -1 ), glm.vec3 ( 2, 2, 2 ) )
-        self.texture = Texture.Texture ( '../../Textures/block.jpg' ) 
-        self.shader  = Program.Program ( vertex = "textured.vsh", fragment = "textured.fsh" )
-		
-        self.texture.bind       ( 0 )
+        self.mesh      = Mesh.Mesh.createKnot ( 1, 4, 120, 30 )
+        self.texture, target, w, h, d = dds.readDdsFile ( '../../Textures/Fieldstone.dds' )
+        #self.texture   = Texture.Texture ( '../../Textures/block.jpg' )
+        self.shader    = Program.Program ( vertex = "textured.vsh", fragment = "textured.fsh" )
+        glBindTexture ( GL_TEXTURE_2D, self.texture )
         self.shader.use         ()
         self.shader.setTexture  ( "image", 0 )
 
