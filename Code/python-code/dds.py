@@ -128,7 +128,6 @@ def readDds ( b ):
         return
 
     print ( 'After headers offs is', offs )
-    #offs = 124
 	
     hasFourCC    = (formatFlags & DDPF_FOURCC) != 0
     hasAlpha     = (formatFlags & DDPF_ALPHAPIXELS) != 0
@@ -159,7 +158,7 @@ def readDds ( b ):
     if isCubeMap and (width != height):
         print ( 'Cubemap width != height' )
 
-    print ( '------DDS------\n', fourCC, hasAlpha, hasMipmap, isCubeMap, isVolume )
+    #print ( '------DDS------\n', fourCC, hasAlpha, hasMipmap, isCubeMap, isVolume )
     
     if hasFourCC:
         if fourCC == b'30315844':    # DX10 signature
@@ -237,8 +236,39 @@ def readDds ( b ):
     glTexParameteri ( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
     glTexParameteri ( target, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
 
+    if not isCompressed:		# uncompressed data, simply load layers/levels
+        for layer in range ( layerCount ):
+            w = width
+            h = height
+            d = depth
+
+            for level in range ( mipMapCount ):
+                    # upload level
+                trg           = cubeFaces [layer] if isCubeMap else target
+                numComponents = (rgbBitCount + 7) // 8
+                sz            = w * h * numComponents
+                bits          = b[offs:offs+sz]
+            
+                if target == GL_TEXTURE_1D:
+                    glCompressedTexImage1D ( trg, level, format, w, 0, bits )
+                elif target == GL_TEXTURE_2D:
+                    glCompressedTexImage2D ( trg, level, format, w, h, 0, bits )
+                elif target == GL_TEXTURE_3D:
+                    glCompressedTexImage2D ( trg, level, format, w, h, d, 0, bits )
+                elif target == GL_TEXTURE_CUBE_MAP:
+                    glCompressedTexImage2D ( cubeFaces[layer], level, format, w, h, 0, bits )
+        
+                    # prepare for next level
+                offs += sz
+                w     = max ( 1, w // 2 )
+                h     = max ( 1, h // 2 )
+                d     = max ( 1, d // 2 )
+
+        return id, target, width, height, depth
+
+
     #offs = 124    
-        # now upload texture data
+        # now upload compressed texture data
     for layer in range ( layerCount ):
         w = width
         h = height
@@ -271,7 +301,7 @@ def readDds ( b ):
             d     = max ( 1, d // 2 )
 
     #glGenerateMipmap ( target )
-    print ( 'OUT', id, target, width, height, depth, layerCount, isCubeMap, format )
+    #print ( 'OUT', id, target, width, height, depth, layerCount, isCubeMap, format )
     return id, target, width, height, depth
 
 def readDdsFile ( fileName ):

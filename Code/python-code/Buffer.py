@@ -4,18 +4,18 @@
 
 from OpenGL.GL import *
 import numpy
-#import OpenGL.GL.shaders
-#import glm
 
 class    Buffer:
-    def __init__ ( self, target, data ):
+    def __init__ ( self, target, data, dtype = numpy.float32 ):
+        #assert self.id > 0, "Invalid buffer"
         self.target = target
         self.id     = glGenBuffers ( 1 )
 
+            # convert to numpy array for uploading
+        arr = numpy.array ( data, dtype = dtype )
+            # upload data to GPU
         glBindBuffer ( self.target, self.id )
-        glBufferData ( self.target, 4*len(data), numpy.array(data, dtype = numpy.float32), GL_STATIC_DRAW )
-        print(self.id, len(data))
-        assert self.id > 0, "Invalid buffer"
+        glBufferData ( self.target, arr.itemsize*arr.size, arr, GL_STATIC_DRAW )
 
     def bind ( self, target = None ):
         if target is None:

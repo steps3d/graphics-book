@@ -11,20 +11,33 @@ class    Program:
     types = {"vertex" : GL_VERTEX_SHADER, "fragment" : GL_FRAGMENT_SHADER, "geometry": GL_GEOMETRY_SHADER, 
             "tesscontrol": GL_TESS_CONTROL_SHADER, "tesseval": GL_TESS_EVALUATION_SHADER, "compute": GL_COMPUTE_SHADER}
 			
-    def __init__ ( self, **kwargs ):
+    def __init__ ( self, validate = False, **kwargs ):
         if "glsl" in kwargs:        # get all shaders from one file using -- syntax
             shaders = self.loadFromComposite ( kwargs ["glsl"] )
         else:
             self.vertexShader   = self.compileShader ( kwargs["vertex"],   GL_VERTEX_SHADER )
             self.fragmentShader = self.compileShader ( kwargs["fragment"], GL_FRAGMENT_SHADER )
             shaders             = [self.vertexShader, self.fragmentShader]
+
             if "geometry" in kwargs:
                 self.geometryShader = self.compileShader ( kwargs["geometry"], GL_GEOMETRY_SHADER )
                 shaders.append ( self.geometryShader )
             else:
                 self.geometryShader = 0
 
-        self.program = OpenGL.GL.shaders.compileProgram ( *shaders )
+            if "tesscontrol" in kwargs:
+                self.tessControlShader = self.compileShader ( kwargs["tesscontrol"], GL_TESS_CONTROL_SHADER )
+                shaders.append ( self.tessControlShader )
+            else:
+                self.tessControlShader = 0
+
+            if "tesseval" in kwargs:
+                self.tessEvalShader = self.compileShader ( kwargs["tesseval"], GL_TESS_EVALUATION_SHADER )
+                shaders.append ( self.tessEvalShader )
+            else:
+                self.tessEvalShader = 0
+
+        self.program = OpenGL.GL.shaders.compileProgram ( *shaders, validate = validate )
         assert self.program > 0, "Invalid program"
 
     def loadFromComposite ( self, filename ):
@@ -33,9 +46,27 @@ class    Program:
 		
         with open ( filename ) as file:
             for line in file:
+
+                if line.lstrip ().startswith ( '//' ) or line.lstrip () == "":
+                    continue
+					
+                if line.lstrip ().startswith ( '#include' ):
+
+                        # get file name and dequote it
+                    file = line.split ()[1][1:-2]
+                    with open ( file ) as f:
+                        for ln in f:
+                            data [curr] += ln
+
+                    continue
+
+                if line.lstrip ().startswith ( '#version' ):
+                        # add defines
+                    pass
+
                 if line.lstrip ().rstrip ().startswith ( "--" ):        # new shader startswith
                     curr = line.lstrip ().rstrip () [2:].lower ().split () [0]
-                    assert curr in Program.types, "Invalid shader type"
+                    assert curr in Program.types, f"Invalid shader type {curr}"
                     data [curr] = ''
                 else:
                     assert curr is not None, "Missing shader type"
@@ -50,6 +81,12 @@ class    Program:
                 self.vertexShader = shader
             elif sh == "fragment":
                 self.fragmentShader = shader
+            elif sh == "geometry":
+                self.geometryShader = shader
+            elif sh == "tesscontrol":
+                self.tessControlShader = shader
+            elif sh == "tesseval":
+                self.tessEvalShader = shader
 		
         return shaders
 
@@ -58,7 +95,6 @@ class    Program:
         return OpenGL.GL.shaders.compileShader ( source, shaderType )
 
     def compileShader ( self, fileName, shaderType ):
-        #source = ""
         with open ( fileName ) as file:
             source = file.read()
         return self.compileShaderSource ( source, shaderType )
@@ -135,11 +171,11 @@ class    Program:
             return
 			
         glVertexAttribPointer ( loc, 					# index
-							numComponents, 				# number of values per vertex
-							type, 						# type (GL_FLOAT)
-							GL_TRUE if normalized else GL_FALSE,
-							stride, 					# stride (offset to next vertex data)
-							offs )
+							    numComponents, 				# number of values per vertex
+							    type, 						# type (GL_FLOAT)
+							    GL_TRUE if normalized else GL_FALSE,
+							    stride, 					# stride (offset to next vertex data)
+							    offs )
 		
         glEnableVertexAttribArray ( loc )
 

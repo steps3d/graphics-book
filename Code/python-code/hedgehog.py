@@ -13,9 +13,10 @@ class   MyWindow ( Window.RotationWindow ):
         self.kd       = 0.8
         self.ka       = 0.2
         self.ks       = 0.2
+        self.length   = 1
         self.mesh     = loadObj.loadObj ( '../../Models/dragon.obj', scale = 20 )
+        self.fur      = Program.Program ( glsl = "hedgehog.glsl" )
         self.shader   = Program.Program ( glsl = "blinn-phong.glsl" )
-        self.shader.use ()
         self.center = (self.mesh.min + self.mesh.max) * 0.5
         self.transf = glm.translate ( glm.mat4(1), -self.center )
 
@@ -24,18 +25,37 @@ class   MyWindow ( Window.RotationWindow ):
         glClear      ( GL_COLOR_BUFFER_BIT + GL_DEPTH_BUFFER_BIT )
         glEnable     ( GL_DEPTH_TEST )
 
+        self.shader.use ()
         self.shader.setUniformMat ( "mv", self.getRotation () * self.transf)
         self.shader.setUniformMat ( "nm", self.normalMatrix ( self.getRotation () ) )
         self.mesh.render()
 
+        self.fur.use ()
+        self.fur.setUniformMat ( "mv", self.getRotation () * self.transf)
+        self.fur.setUniformMat ( "nm", self.normalMatrix ( self.getRotation () ) )
+        self.fur.setUniformMat ( "proj",  self.getProjection () )
+        self.fur.setUniformInt ( "length", self.length )
+        self.mesh.render()
+
+
     def reshape ( self, width, height ):
         super().reshape ( width, height )
+        self.shader.use ()
         self.shader.setUniformMat   ( "proj",  self.getProjection () )
         self.shader.setUniformVec   ( "eye",   self.eye )
         self.shader.setUniformVec   ( "lightDir", self.lightDir )
         self.shader.setUniformFloat ( "kd", self.kd )
         self.shader.setUniformFloat ( "ks", self.ks )
         self.shader.setUniformFloat ( "ka", self.ka )
+
+    def key ( self, key, scancode, action, mods ):
+        #print ( key, action )
+        super().key ( key, scancode, action, mods )
+        if key == 334 and action == 1:
+            self.length += 1
+        elif key == 333 and action == 1 and self.length > 0:
+            self.length -= 1
+  
 
     def mouseScroll ( self, dx, dy ):
         self.eye += glm.vec3 ( 0.1 * ( 1 if dy >= 0 else -1 ) )

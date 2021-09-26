@@ -32,20 +32,20 @@ class   Framebuffer:
         glBindFramebuffer ( GL_FRAMEBUFFER, 0 )
 
     def attachTexture ( self, tex ):
-        print ( 'Attaching', tex, type(tex) )
+        #print ( 'Attaching', tex, type(tex) )
         assert self.id != 0, "Must have a valid framebuffer object"
         assert self.width == tex.width and self.height == tex.height, "Texture size must match to framebuffer"
 
         no = len ( self.colorBuffers )
         self.colorBuffers.append ( tex )
 
-        glBindTexture          ( tex.target, tex.id )
+        #glBindTexture          ( tex.target, tex.id )
         glFramebufferTexture2D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, tex.target, tex.id, 0 )
 
         return no
 
-    def createTexture ( self, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
-	    return Texture.Texture.createEmpty ( self.width, self.height, intFormat, format )
+    def createTexture ( self, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
+	    return Texture.Texture.createEmpty ( self.width, self.height, target = target, intFormat = intFormat, format = format, clamp = clamp, filter = filter )
 		
     def attachDepthTexture ( self, tex ):
         assert self.id != 0, "Must have a valid framebuffer object"
@@ -69,6 +69,23 @@ class   Framebuffer:
         glBindTexture        ( tex.target, tex.id )
         glFramebufferTexture ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, tex.id, 0 )
 
+    def attachDepthSlice ( self, tex,  sOffs ):
+        assert self.id != 0, "Must have a valid framebuffer object"
+        assert self.width == tex.width and self.height == tex.height, "Texture size must match to framebuffer"
+        assert tex.target == GL_TEXTURE_3D
+
+        no = len ( self.colorBuffers )
+
+        colorBuffers.append ( tex )
+        glBindTexture          ( GL_TEXTURE_3D, tex.id );
+        glFramebufferTexture3D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, GL_TEXTURE_3D, tex.id, 0, sOffs );
+
+    def __enter__ ( self ):
+        self.bind ()
+
+    def __exit__ ( self ):
+        self.unbind ()
+
     def bind ( self ):
         assert self.id != 0
 
@@ -90,8 +107,8 @@ class   Framebuffer:
         glBindFramebuffer ( GL_FRAMEBUFFER, 0 )
         glViewport        ( self.saveViewport [0], self.saveViewport [1], self.saveViewport [2], self.saveViewport [3] )
 
-    def drawBuffers ( self, no ):
-        buffers = tuple ( GL_COLOR_ATTACHMENT0 + i for i in range ( no ) )
+    def drawBuffers ( self, count ):
+        buffers = tuple ( GL_COLOR_ATTACHMENT0 + i for i in range ( count ) )
         glDrawBuffer ( no, buffers )
 
     def buildMipmaps ( self, no ):
