@@ -3,7 +3,7 @@ README file for python code
 In the file requirements.txt you will find all python requirements to 
 run this code. You will also need python >= 3.7.
 
-python -m pip intall -r requrements.txt
+python -m pip intall -r requirements.txt
 
 Added compute shader example.
 Added partial support for 2D and cubemap DDS textures
