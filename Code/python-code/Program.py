@@ -8,31 +8,42 @@ import OpenGL.GL.shaders
 import glm
 
 class    Program:
-    types = {"vertex" : GL_VERTEX_SHADER, "fragment" : GL_FRAGMENT_SHADER, "geometry": GL_GEOMETRY_SHADER, 
+    types = {"vertex" : GL_VERTEX_SHADER, "fragment" : GL_FRAGMENT_SHADER, "geometry": GL_GEOMETRY_SHADER,
             "tesscontrol": GL_TESS_CONTROL_SHADER, "tesseval": GL_TESS_EVALUATION_SHADER, "compute": GL_COMPUTE_SHADER}
-			
+            
     def __init__ ( self, validate = False, **kwargs ):
         if "glsl" in kwargs:        # get all shaders from one file using -- syntax
             shaders = self.loadFromComposite ( kwargs ["glsl"] )
+        elif ("vertex_source" in kwargs) or ("fragment_source" in kwargs):
+            self.vertexShader   = self.compileShaderSource ( kwargs["vertex_source"],   GL_VERTEX_SHADER )
+            self.fragmentShader = self.compileShaderSource ( kwargs["fragment_source"], GL_FRAGMENT_SHADER )
+            shaders             = [self.vertexShader, self.fragmentShader]
+
+            if "geometry_source" in kwargs:
+                self.geometryShader = self.compileShaderSource ( kwargs["geometry_source"], GL_GEOMETRY_SHADER )
+                shaders.append ( self.geometryShader )
+            else:
+                self.geometryShader = 0
+            # ?????
         else:
-            self.vertexShader   = self.compileShader ( kwargs["vertex"],   GL_VERTEX_SHADER )
-            self.fragmentShader = self.compileShader ( kwargs["fragment"], GL_FRAGMENT_SHADER )
+            self.vertexShader   = self.compileShaderFile ( kwargs["vertex"],   GL_VERTEX_SHADER )
+            self.fragmentShader = self.compileShaderFile ( kwargs["fragment"], GL_FRAGMENT_SHADER )
             shaders             = [self.vertexShader, self.fragmentShader]
 
             if "geometry" in kwargs:
-                self.geometryShader = self.compileShader ( kwargs["geometry"], GL_GEOMETRY_SHADER )
+                self.geometryShader = self.compileShaderFile ( kwargs["geometry"], GL_GEOMETRY_SHADER )
                 shaders.append ( self.geometryShader )
             else:
                 self.geometryShader = 0
 
             if "tesscontrol" in kwargs:
-                self.tessControlShader = self.compileShader ( kwargs["tesscontrol"], GL_TESS_CONTROL_SHADER )
+                self.tessControlShader = self.compileShaderFile ( kwargs["tesscontrol"], GL_TESS_CONTROL_SHADER )
                 shaders.append ( self.tessControlShader )
             else:
                 self.tessControlShader = 0
 
             if "tesseval" in kwargs:
-                self.tessEvalShader = self.compileShader ( kwargs["tesseval"], GL_TESS_EVALUATION_SHADER )
+                self.tessEvalShader = self.compileShaderFile ( kwargs["tesseval"], GL_TESS_EVALUATION_SHADER )
                 shaders.append ( self.tessEvalShader )
             else:
                 self.tessEvalShader = 0
@@ -40,30 +51,31 @@ class    Program:
         self.program = OpenGL.GL.shaders.compileProgram ( *shaders, validate = validate )
         assert self.program > 0, "Invalid program"
 
-    def loadFromComposite ( self, filename ):
+    def loadFromComposite ( self, filename, defines = None ):
         data = dict ()                  # shader type to GL type and source
         curr = None                     # no active type
-		
+        
         with open ( filename ) as file:
             for line in file:
 
                 if line.lstrip ().startswith ( '//' ) or line.lstrip () == "":
                     continue
-					
+                    
                 if line.lstrip ().startswith ( '#include' ):
 
                         # get file name and dequote it
                     file = line.split ()[1][1:-2]
                     with open ( file ) as f:
                         for ln in f:
-                            data [curr] += ln
+                            data [curr] = data [curr] + ln
 
                     continue
 
-                if line.lstrip ().startswith ( '#version' ):
+                if line.lstrip ().startswith ( '#version' ) and defines:
                         # add defines
-                    pass
-
+                    for k in defines:
+                        res = res + f'#define {k}\t\t{d[k]}\n'
+            
                 if line.lstrip ().rstrip ().startswith ( "--" ):        # new shader startswith
                     curr = line.lstrip ().rstrip () [2:].lower ().split () [0]
                     assert curr in Program.types, f"Invalid shader type {curr}"
@@ -73,9 +85,9 @@ class    Program:
                     data [curr] = data [curr] + line
 
         shaders = []
-		
+        
         for sh in data:
-            shader = self.compileShaderSource ( data [sh], Program.types [sh] )
+            shader = self.compileShaderSource ( data [sh], Program.types [sh], defines )
             shaders.append ( shader )
             if sh == "vertex":
                 self.vertexShader = shader
@@ -87,17 +99,41 @@ class    Program:
                 self.tessControlShader = shader
             elif sh == "tesseval":
                 self.tessEvalShader = shader
-		
+        
         return shaders
 
-    def compileShaderSource ( self, source, shaderType ):
+    def compileShaderFile ( self, fileName, shaderType, defines = None ):
+        source = open ( fileName ).read ()
+        return self.compileShaderString ( self.processShaderSource ( source, defines ), shaderType )
+        
+    def compileShaderSource ( self, source, shaderType, defines = None ):
+        return self.compileShaderString ( self.processShaderSource ( source, defines ), shaderType )
+
+    def processShaderSource ( self, source, defines = None ):
+        res = ''
+        for line in source.split ( '\n' ):
+            if line.lstrip ().startswith ( '#include' ):
+
+                    # get file name and dequote it
+                file = line.split ()[1][1:-2]
+                with open ( file ) as f:
+                    for ln in f:
+                        res = res + ln
+
+                continue
+
+            if line.lstrip ().startswith ( '#version' ) and defines:
+                    # add defines
+                for k in defines:
+                    res = res + f'#define {k}\t\t{d[k]}\n'
+            
+                # add line as it is
+            res = res + line + '\n'
+        return res
+
+    def compileShaderString ( self, source, shaderType ):
         source = str.encode ( source )
         return OpenGL.GL.shaders.compileShader ( source, shaderType )
-
-    def compileShader ( self, fileName, shaderType ):
-        with open ( fileName ) as file:
-            source = file.read()
-        return self.compileShaderSource ( source, shaderType )
 
     def use ( self ):
         glUseProgram ( self.program )
@@ -155,7 +191,6 @@ class    Program:
         if loc < 0:
             return
 
-        #print ( name, value )
         if isinstance(value, glm.mat4):
             glUniformMatrix4fv ( loc, 1, GL_TRUE if transpose else GL_FALSE, value.to_tuple() )
         elif isinstance(value, glm.mat3):
@@ -169,13 +204,26 @@ class    Program:
         loc = glGetUniformLocation ( self.program, name )
         if loc < 0:
             return
-			
-        glVertexAttribPointer ( loc, 					# index
-							    numComponents, 				# number of values per vertex
-							    type, 						# type (GL_FLOAT)
-							    GL_TRUE if normalized else GL_FALSE,
-							    stride, 					# stride (offset to next vertex data)
-							    offs )
-		
+            
+        glVertexAttribPointer ( loc,                         # index
+                                numComponents,                 # number of values per vertex
+                                type,                         # type (GL_FLOAT)
+                                GL_TRUE if normalized else GL_FALSE,
+                                stride,                     # stride (offset to next vertex data)
+                                offs )
+        
+        glEnableVertexAttribArray ( loc )
+
+    def setIntAttrPtr ( self, name, numComponents, stride, offs, type, normalized = False ):
+        loc = glGetUniformLocation ( self.program, name )
+        if loc < 0:
+            return
+            
+        glVertexAttribIPointer ( loc,                         # index
+                                numComponents,                 # number of values per vertex
+                                type,                         # type (GL_FLOAT)
+                                stride,                     # stride (offset to next vertex data)
+                                offs )
+        
         glEnableVertexAttribArray ( loc )
 

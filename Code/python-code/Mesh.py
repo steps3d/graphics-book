@@ -15,8 +15,8 @@ class    Mesh:
         self.vbo      = 0
         self.ibo      = 0
         self.stride   = 14 * 4      # 14 floats per vertex
-        self.min      = None		# bbox is undefined
-        self.max      = None		# bbox is undefined
+        self.min      = None        # bbox is undefined
+        self.max      = None        # bbox is undefined
 
     def addVertex ( self, pos, tex, normal, tangent = None, binormal = None ):
         self.updateBox ( pos )
@@ -214,3 +214,84 @@ class    Mesh:
         mesh.create ()
 
         return mesh
+
+
+class NewMesh:
+    def __init__  ( self, mode = GL_TRIANGLES ):
+        self.vbo         = 0
+        self.ibo         = 0
+        self.vao         = 0
+        self.numVertices = 0
+        self.numIndices  = 0
+        self.vertices    = None     # vertex buffer as list/tuple/numpy.array
+        self.indices     = None
+        self.mode        = mode
+        self.attributes  = {}
+        
+    def create ( self ):
+        self.vao = glGenVertexArrays ( 1 )
+        glBindVertexArray ( self.vao )
+
+        #self.vbo = glGenBuffers ( 1 )
+        #glBindBuffer ( GL_ARRAY_BUFFER, self.vbo )
+        #glBufferData ( GL_ARRAY_BUFFER, len(self.vertices)*self.stride, numpy.array(self.vertices, dtype = numpy.float32), GL_STATIC_DRAW )
+        #print ( 'create', len(self.vertices), self.stride )
+        #print ( 'create', len(self.indices) )
+
+        if self.indices is not None:    # must be already be Buffer object
+            if self.indexType == GL_UNSIGNED_BYTE:
+                 indexSize = 1
+                 dtype     = numpy.uint8
+            elif self.indexType == GL_UNSIGNED_SHORT:
+                 indexSize = 2
+                 dtype     = numpy.uint16
+            if self.indexType == GL_UNSIGNED_INT:
+                 indexSize = 4
+                 dtype     = numpy.uint32
+
+            self.indices.bind ( GL_ELEMENT_ARRAY_BUFFER )   #glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, self.indices.id )
+            #glBufferData ( GL_ELEMENT_ARRAY_BUFFER, len(self.indices)*indexSize, numpy.array(self.indices, dtype = dtype), GL_STATIC_DRAW )
+
+        for name in self.attributes:
+            index, buffer, numComponents, dtype, stride, offs, normalized = self.attributes [name]
+
+            buffer.bind ( GL_ARRAY_BUFFER )
+            if dtype == GL_FLOAT:
+                glVertexAttribPointer     ( index, numComponents, dtype, normalized, stride, ctypes.c_void_p(offs) )
+                glEnableVertexAttribArray ( index )
+            else:           # integer data type
+                glVertexAttribIPointer    ( index, numComponents, dtype, stride, ctypes.c_void_p(offs) )
+                glEnableVertexAttribArray ( index )
+                        
+        glBindVertexArray ( 0 )
+
+    def addAttribute ( self, name, buffer, index, dtype, numComponents, stride, offs, normalized = False ):
+        self.attributes [name] = (index, buffer, numComponents, dtype, stride, offs, normalized )
+        self.stride            = stride
+        #print ( 'stride', stride )
+        
+    #def setVertexBuffer ( self, buffer, numVertices ):
+    #    self.vertices    = buffer
+    #    self.numVertices = numVertices
+    #    #print ( 'setVertexBuffer', numVertices, buffer )
+
+    def setIndexBuffer ( self, buffer, offs, numIndices, dtype = GL_UNSIGNED_INT ):
+        self.indices    = buffer
+        self.indexType  = dtype
+        self.indexOffs  = offs
+        self.numIndices = numIndices
+        #print ( 'setIndexBuffer', buffer, numIndices, dtype, buffer )
+        
+    def render ( self ):
+        glBindVertexArray ( self.vao )
+        if self.indices:
+            #print ( 'GLDRAW', self.mode, self.numVertices, self.numIndices, self.indexType, int(GL_UNSIGNED_INT), int(GL_UNSIGNED_SHORT) )
+            #glDrawElements ( self.mode, 9, self.indexType, None )
+            #print ( 'render:', self.mode, self.numIndices, self.indexType, ctypes.c_void_p ( self.indexOffs ) )
+            #print ( self.attributes )
+
+            glDrawElements ( self.mode, self.numIndices, self.indexType, ctypes.c_void_p ( self.indexOffs ) )
+        else:
+            glDrawArrays   ( self.mode, 0, self.numVertices )
+
+

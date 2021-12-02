@@ -32,10 +32,13 @@ def loadObj( filename, scale = 1.0 ):
             for v in values[1:4]:
                 w = v.split('/')
                 face_i.append(int(w[0])-1)
-                text_i.append(int(w[1])-1)
-                norm_i.append(int(w[2])-1)
+                if len(w) > 1 and len(w[1]) > 0:	# skip empty strings
+                    text_i.append(int(w[1])-1)
+                if len(w) > 2:
+                    norm_i.append(int(w[2])-1)
             vertex_index.append  ( face_i )
-            texture_index.append ( text_i )
+            if len(text_i) > 0:
+                texture_index.append ( text_i )
             normal_index.append  ( norm_i )
 
     vertices = []		# keep here pos, tex, normal
@@ -45,8 +48,8 @@ def loadObj( filename, scale = 1.0 ):
     for i in range(len(vertex_index)):
         for j in range(3):
             vi = vert_coords[vertex_index  [i][j]]
-            ti = text_coords[texture_index [i][j]]
-            ni = norm_coords[normal_index  [i][j]]
+            ti = text_coords[texture_index [i][j]] if len(text_coords) > 0 else (0,0)
+            ni = norm_coords[normal_index  [i][j]] if len(norm_coords) > 0 else (0,0,1)
             vertex = ( float(vi[0]), float(vi [1]), float(vi[2]), float(ti[0]), float(ti[1]), float(ni[0]), float(ni[1]), float(ni[2]) )
             if vertex in index:		# we already have this key, use it's index
                 k = index [vertex]

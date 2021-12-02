@@ -2,7 +2,6 @@ from OpenGL.GL import *
 import glm
 import Window
 import Program
-#import Mesh
 import Buffer
 
 class   MyWindow ( Window.RotationWindow ):

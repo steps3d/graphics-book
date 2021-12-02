@@ -13,7 +13,12 @@ class   MyWindow ( Window.RotationWindow ):
         self.kd       = 0.8
         self.ka       = 0.2
         self.ks       = 0.2
-        self.mesh     = loadObj.loadObj ( '../../Models/dragon.obj', scale = 20 )
+        #self.mesh     = loadObj.loadObj ( '../../Models/dragon.obj', scale = 20 )
+        #self.mesh     = loadObj.loadObj ( '../../Models/buddha.obj', scale = 2 )
+        #self.mesh     = loadObj.loadObj ( '../../Models/teapot.obj', scale = 0.1 )
+        #self.mesh     = loadObj.loadObj ( '../../Models/bunny.obj', scale = 2 )
+        #self.mesh     = loadObj.loadObj ( '../../Models/armadillo.obj', scale = 2 )
+        self.mesh     = loadObj.loadObj ( '../../Models/duck.obj', scale = 2 )
         self.shader   = Program.Program ( glsl = "blinn-phong.glsl" )
         self.shader.use ()
         self.center = (self.mesh.min + self.mesh.max) * 0.5

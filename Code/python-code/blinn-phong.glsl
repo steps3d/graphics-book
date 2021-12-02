@@ -38,16 +38,16 @@ in vec3 h;
 out vec4 color;
 
 const float specPower = 70.0;
+const vec4  clr  = vec4 ( 0.7, 0.1, 0.1, 1.0 );
 
 void main(void)
 {
 	vec3  n2   = normalize ( n );
 	vec3  l2   = normalize ( l );
 	vec3  h2   = normalize ( h );
-	float nl   = dot(n2, l2);
+	float nl   = dot       ( n2, l2 );
 	float diff = max ( nl, 0.0 );
 	float spec = pow ( max ( dot ( n2, h2 ), 0.0 ), specPower );
-	vec4  clr  = vec4 ( 0.7, 0.1, 0.1, 1.0 );
 	float ka   = 0.2;
 	float kd   = 0.8;
 	float ks   = 0.5;

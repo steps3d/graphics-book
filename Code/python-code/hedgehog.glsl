@@ -52,7 +52,7 @@ void produceVertices ( in vec4 v, in vec3 n )
 		EmitVertex ();
 
 		v.xyz += step * n;
-		v.z   -= droop * float ( i * i );
+		//v.z   -= droop * float ( i * i );
 	}
 
 	EndPrimitive ();

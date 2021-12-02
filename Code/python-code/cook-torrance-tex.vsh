@@ -17,7 +17,7 @@ out vec3  l;
 out vec2  tx;
 void main(void)
 {
-	vec4 	p        = mv * vec4 ( pos, 1.0 );
+	vec4 	p        = mv * vec4 ( 40*pos, 1.0 );
 	vec3	binormal = cross ( normal, tangent );
 	
 	gl_Position  = proj * p;

@@ -26,6 +26,8 @@ void main(void)
 	vec4 p        = mv * vec4 ( pos, 1.0 );
 	vec3 binormal = cross ( normal, tangent );
 
+//p.xyz *= 50.0;
+
 	gl_Position  = proj * p;
 
 	tx = tex;		// for knot

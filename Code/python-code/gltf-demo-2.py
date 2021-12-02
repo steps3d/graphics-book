@@ -1,3 +1,4 @@
+import sys
 import os
 import os.path
 import glm
@@ -8,54 +9,296 @@ import Window
 import Program
 import Texture
 import Mesh
+import Buffer
 
-    # map to numpy.array
-def toArray ( blob, accessor, view, dtype, n ):
-    arr=numpy.frombuffer ( blob [view.byteOffset + accessor.byteOffset : view.byteOffset + view.byteLength], dtype = dtype, count = accessor.count * n )
+class Node:
+    def __init__ ( self, node ):
+        self.name        = node.name
+        self.mesh        = node.mesh
+        self.children    = node.children
+        self.mesh        = None
+        self.matrix      = glm.mat4 ( 1.0 )
+        self.rotation    = None
+        self.translation = None
+        self.scale       = None
+        
+        if "matrix" in node.__dict__ and node.matrix:
+            self.matrix = glm.mat4 ( node.matrix )
+
+        if "rotation" in node.__dict__ and node.rotation:
+            self.rotation = glm.quat ( node.rotation )
+
+        if "translation" in node.__dict__ and node.translation:
+            self.translation = glm.vec3 ( node.translation )
+
+        if "scale" in node.__dict__ and node.scale:
+            self.scale = glm.vec3 ( node.scale )
+
+    def addChild ( self, node ):
+        self.children.append ( node )
+        
+    def setMesh ( self, mesh ):
+        self.mesh = mesh
+        
+    def render ( self, shader, matrix, name ):      
+        matrix = matrix * self.matrix
+        shader.setUniformMat ( name, matrix )
+        self.mesh.render ()
+        
+        for child in self.children:
+            child.render ( shader, matrix, name )
+        
+"""
+	Load all buffers into VBO (vertex and element)
+"""
+def loadBuffers ( gltf, index ):
+    indexBuffer = attrToBuffer ( gltf, index )
+
+    for buffer in gltf.buffers:
+        buffer.blob   = gltf.load_file_uri ( buffer.uri )
+        target        = GL_ARRAY_BUFFER if buffer != indexBuffer else GL_ELEMENT_ARRAY_BUFFER
+        buffer.buffer = Buffer.Buffer ( target, numpy.frombuffer ( buffer.blob, dtype = numpy.uint8 ), dtype = numpy.uint8 )
+
+def loadBufferBlob ( gltf, buffer ):
+    buffer.blob = gltf.load_file_uri ( buffer.uri )
+
+def attrToBuffer ( gltf, attr ):
+    accessor = gltf.accessors[attr]                          	# acessor.componentType (5123 - GL_FLOAT, ...), count, type ("SCALAR", "VEC3"), min, max
+    view     = gltf.bufferViews[accessor.bufferView]        	# view.target (34962 - ARRAY_BUFFER, 34963 - ELEMENT_ARRAY_BUFFER), byteStride for interleaving data
+    
+    return gltf.buffers [view.buffer]
+
+def attrProps ( gltf, attr ):
+    if attr is None:
+        return None
+
+    accessor      = gltf.accessors[attr]                          	# acessor.componentType (5123 - GL_FLOAT, ...), count, type ("SCALAR", "VEC3"), min, max
+    view          = gltf.bufferViews[accessor.bufferView]        	# view.target (34962 - ARRAY_BUFFER, 34963 - ELEMENT_ARRAY_BUFFER), byteStride for interleaving data
+    numComponents = getAttrNumComponents ( gltf, attr )
+    offs          = view.byteOffset + accessor.byteOffset
+    itemSize      = getAttrTypeSize ( gltf, attr ) * numComponents
+
+    return view.buffer, accessor.componentType, numComponents, offs, accessor.count		# buffer, type, numComponents, offset in buffer, # of elements
+
+def registerMeshAttrs ( gltf, primitive, mesh ):
+    attrs = {   
+        "pos":      ( 0, primitive.attributes.POSITION   ),
+        "texCoord": ( 1, primitive.attributes.TEXCOORD_0 ),
+        "normal":   ( 2, primitive.attributes.NORMAL     ),
+        "tangent":  ( 3, primitive.attributes.TANGENT    ),
+        "joints":   ( 5, primitive.attributes.JOINTS_0   ),
+        "weights":  ( 6, primitive.attributes.WEIGHTS_0  )
+    }
+	
+    loadBuffers ( gltf, primitive.indices )
+
+    glBindVertexArray ( mesh.vao )
+
+    for name in attrs:
+        index, attr  = [name]
+
+        if attr is None:
+            continue
+
+        buffer, dtype, numComponents, offs, count = attrProps ( gltf, attr )
+        normalized = (name == "normal" or name == "tangent")
+        stride     = getAttrTypeSize ( gltf, attr ) * numComponents
+        buffer.buffer.bind ( target = GL_ARRAY_BUFFER )
+        mesh.addAttribute ( name, index = index, dtype = dtype, numComponents = numComponents, stride = stride, offs = offs, normalized = normalized )
+
+    mesh.ibo = attrToBuffer ( gltf, primitive.indices )
+        # need to register all used buffer in mesh object
+    glBindVertexArray ( 0 )
+
+
+def attrToArray ( gltf, attr ):
+    if attr is None:
+        return None
+
+    accessor = gltf.accessors[attr]                          	# acessor.componentType (5123 - GL_FLOAT, ...), count, type ("SCALAR", "VEC3"), min, max
+    view     = gltf.bufferViews[accessor.bufferView]        	# view.target (34962 - ARRAY_BUFFER, 34963 - ELEMENT_ARRAY_BUFFER), byteStride for interleaving data
+    
+    if not "blob" in gltf.buffers [view.buffer].__dict__:
+        loadBufferBlob ( gltf, gltf.buffers [view.buffer] )
+        
+    blob = gltf.buffers [view.buffer].blob
+
+         # get compontent type as GL_* type constant
+    if accessor.componentType == GL_FLOAT:
+        dtype = "float32"
+    elif accessor.componentType == GL_UNSIGNED_INT:
+        dtype = "uint32"
+    elif accessor.componentType == GL_INT:
+        dtype = "int32"
+    elif accessor.componentType == GL_UNSIGNED_SHORT:
+        dtype = "uint16"
+    elif accessor.componentType == GL_SHORT:
+        dtype = "int16"
+    elif accessor.componentType == GL_UNSIGNED_BYTE:
+        dtype = "uint8"
+    elif accessor.componentType == GL_BYTE:
+        dtype = "int8"
+    else:
+        print ( f"Unknow accessor.componentType = {accessor.componentType}" )
+
+    if accessor.type == "SCALAR":
+        n = 1
+    elif accessor.type == "VEC2":
+        n = 2
+    elif accessor.type == "VEC3":
+        n = 3
+    elif accessor.type == "VEC4":
+        n = 4
+    else:
+        print ( f"Unknow accessor.type = {accessor.type}" )
+
+    arr = numpy.frombuffer ( blob [view.byteOffset + accessor.byteOffset : view.byteOffset + view.byteLength], dtype = dtype, count = accessor.count * n )
+    #print ( 'attr2Array', attr, accessor.type, n, dtype, arr )
+	
     return arr.reshape ((-1, n))
 
-def attrToArray ( gltf, blob, attr, n, dtype ):
-    accessor     = gltf.accessors[attr]
-    buffer_view  = gltf.bufferViews[accessor.bufferView]
-    return toArray ( blob, accessor, buffer_view, dtype = dtype, n = n )
+# convertion table for type defs - "float32"-numpy.float32-GL_FLOAT-4 bytes size
+typeTable = { 
+    GL_FLOAT          : ( 4, "float32", numpy.float32 ),
+    GL_UNSIGNED_INT   : ( 4, "uint32", numpy.uint32   ),
+    GL_INT            : ( 4, "int32", numpy.int32     ),
+    GL_UNSIGNED_SHORT : ( 2, "uint16", numpy.uint16   ),
+    GL_SHORT          : ( 2, "int16", numpy.int16     ),
+    GL_UNSIGNED_BYTE  : ( 1, "uint8", numpy.uint8     ),
+    GL_BYTE           : ( 1, "int8", numpy.int8       ),
+}
 
-def _toVec2 ( v ):
-    return glm.vec2 ( v[0], v[1] )
+def getAttrNumComponents ( gltf, attr ):
+    accessor = gltf.accessors [attr]
 
-def _toVec3 ( v ):
-    return glm.vec3 ( v[0], v[1], v[2] )
+    if accessor.type == "SCALAR":
+        return 1
+    elif accessor.type == "VEC2":
+        return 2
+    elif accessor.type == "VEC3":
+        return 3
+    elif accessor.type == "VEC4":
+        return 4
+    else:
+        print ( f"Unknow accessor.type = {accessor.type}" )
 
-def _loadFrom ( gltf, primitive ):
-    print ( 'Attributes: ', primitive.attributes )
-    blob      = gltf.binary_blob()
-    points    = attrToArray ( gltf, blob, primitive.attributes.POSITION,   3, dtype = "float32" )
-    normals   = attrToArray ( gltf, blob, primitive.attributes.NORMAL,     3, dtype = "float32" )
-    texCoords = attrToArray ( gltf, blob, primitive.attributes.TEXCOORD_0, 2, dtype = "float32" )
-    tangents  = attrToArray ( gltf, blob, primitive.attributes.TANGENT,    3, dtype = "float32" )
-    indices   = attrToArray ( gltf, blob, primitive.indices,               1, dtype = "uint16" ).flatten ()
+         # get compontent type as GL_* type constant
+def getAttrType ( gltf, attr ):
+    accessor = gltf.accessors [attr]
+    return accessor.componentType
 
-    #return numpy.hstack ((points, texCoords, normals ))		# concat to array of (pos, tex, n)
+def getAttrTypeSize ( gltf, attr ):
+    accessor = gltf.accessors [attr]
+    
+    if accessor.componentType == GL_FLOAT:
+        return 4
+    elif accessor.componentType == GL_UNSIGNED_INT:
+        return 4
+    elif accessor.componentType == GL_INT:
+        return 4
+    elif accessor.componentType == GL_UNSIGNED_SHORT:
+        return 2
+    elif accessor.componentType == GL_SHORT:
+        return 2
+    elif accessor.componentType == GL_UNSIGNED_BYTE:
+        return 1
+    elif accessor.componentType == GL_BYTE:
+        return 1
+    else:
+        print ( f"Unknow accessor.componentType = {accessor.componentType}" )
 
-    # or this way
-    m = Mesh.Mesh ()
-    for i in range ( len ( points ) ):
-        m.addVertex ( _toVec3(points [i])*100, _toVec2(texCoords [i]), _toVec3(normals [i]), _toVec3(tangents[i]))
+def registerAttributes ( mesh, gltf, primitive ):
+    stride = 0
+    offs   = 0
+    attrs = {   
+        "pos":      ( 0, primitive.attributes.POSITION   ),
+        "texCoord": ( 1, primitive.attributes.TEXCOORD_0 ),
+        "normal":   ( 2, primitive.attributes.NORMAL     ),
+        "tangent":  ( 3, primitive.attributes.TANGENT    ),
+        "joints":   ( 5, primitive.attributes.JOINTS_0   ),
+        "weights":  ( 6, primitive.attributes.WEIGHTS_0  )
+    }
+    
+    for name in attrs:
+        attr = attrs [name][1]
+        if attr:
+            stride += getAttrTypeSize ( gltf, attr ) * getAttrNumComponents ( gltf, attr )
+           
+    for name in attrs:
+        index = attrs [name][0]
+        attr  = attrs [name][1]
+        #print ( ">", name, attr, index )
+        if attr:
+            mesh.addAttribute ( name, index = index, dtype = getAttrType ( gltf, attr ), numComponents = getAttrNumComponents ( gltf, attr ), stride = stride, offs = offs )
+            offs  += getAttrTypeSize ( gltf, attr ) * getAttrNumComponents ( gltf, attr )
 
-    for i in range ( len ( indices ) // 3 ):
-        m.addFace ( indices [3*i], indices [3*i+1], indices [3*i+2] )
+def _loadFrom ( gltf, primitive, meshNo, primitiveNo, material ):
+    """
+       Load a single mesh from a GLTF primitive
+    """
 
+    #vertexAttribs = tuple ( v for v in ( points, normals, texCoords, tangents, joints, weights) if v is not None )
+
+    print ( 'Attributes: ', primitive.attributes.__dict__ )
+    points    = attrToArray ( gltf, primitive.attributes.POSITION   )    # for simple skin we have only POSITION, JOINTS_0 and WEIGHTS_0
+    normals   = attrToArray ( gltf, primitive.attributes.NORMAL     )
+    texCoords = attrToArray ( gltf, primitive.attributes.TEXCOORD_0 )
+    tangents  = attrToArray ( gltf, primitive.attributes.TANGENT    )
+    joints    = attrToArray ( gltf, primitive.attributes.JOINTS_0   )
+    weights   = attrToArray ( gltf, primitive.attributes.WEIGHTS_0  )
+    indices   = attrToArray ( gltf, primitive.indices               )
+    
+    #print ( 'points', points )
+    #print ( 'vertics', points )
+    #print ( 'indices', primitive.indices )
+
+    if indices is not None:
+        indices = indices.flatten ()    # to turn from array of vecs into flat uint array
+        #print ( indices )
+    #return numpy.hstack ((points, texCoords, normals ))        # concat to array of (pos, tex, n)
+    
+        # combine all present attributs together
+    vertices = numpy.hstack ( tuple ( v for v in ( points, normals, texCoords, tangents, joints, weights) if v is not None ) )
+    #print ( 'points:', points [0], points [1] )
+    #print ( 'normals:', normals [0], normals [1] )
+    #print ( '---', vertices [0], vertices [1] )
+
+        # create mesh and set additional attributes
+    m           = Mesh.NewMesh ( primitive.mode )
+    m.mesh      = meshNo
+    m.primitive = primitiveNo
+    m.material  = material
+
+    registerAttributes ( m, gltf, primitive )
+
+    m.setVertexBuffer ( vertices, len ( points ) )
+    
+    if indices is not None:
+        m.setIndexBuffer ( indices, numIndices = len ( indices ), dtype = getAttrType ( gltf, primitive.indices ) )
+        
     m.create ()
     return m
 
+# node (name, index, matrix/rotation/translation/scale
 def loadGltf ( filename ):
-    gltf = GLTF2().load ( filename )
-    current_scene = gltf.scenes[gltf.scene]
-        # we may have to load binary blob manually
-    if gltf.binary_blob () is None:
-        if filename.endswith ( '.gltf'  ):
-            binFilename = filename [0:-5] + '.bin'
-            gltf.set_binary_blob ( open(binFilename, 'rb' ).read () )
+    gltf  = GLTF2().load ( filename )
+    scene = gltf.scenes[gltf.scene]
 
+    #print ( dir ( gltf.buffers[0] ) )
+    print ( 'ASSET',      gltf.asset   )
+    print ( 'BUFFERS',    gltf.buffers )
+    print ( 'SCENES',     gltf.scenes  )
+    print ( 'MESHES',     gltf.meshes     )
+    print ( 'NODES',      gltf.nodes      )
+    print ( 'MATERIALS',  gltf.materials  )
+    print ( 'IMAGES',     gltf.images     )
+    print ( 'SAMPLERS',   gltf.samplers   )
+    print ( 'SKINS',      gltf.skins      )
+    print ( 'ANIMATIONS', gltf.animations )
+    print ( 'TEXTURES',   gltf.textures   )
+    print ( 'IMAGES',     gltf.images     )
+    print ( 'SCENES',     gltf.scenes     )
+    
     materials = []
     for m in gltf.materials:
         d = { 'name': m.name }
@@ -63,20 +306,27 @@ def loadGltf ( filename ):
             d ['color']             = m.pbrMetallicRoughness.baseColorTexture.index
             d ['metallicRoughness'] = m.pbrMetallicRoughness.metallicRoughnessTexture.index
         d ['normal'] = m.normalTexture.index
-        print ( d )
+        #print ( d )
         materials.append ( d )
 
-    m = _loadFrom ( gltf, gltf.meshes[0].primitives[0] )
+    for primitive in gltf.meshes [0].primitives:
+        print ( 'PRIM', primitive )
+
+    m = _loadFrom ( gltf, gltf.meshes[0].primitives[0], 0, 0, gltf.meshes [0].primitives [0].material )
 
     m.textures  = []
     m.materials = materials
 
-    for i in range(len(gltf.accessors)):
-        acc = gltf.accessors [i]
-        if acc.min:
-            print ( 'min/max', acc.min, acc.max )
-            m.min = glm.vec3 ( acc.min )
-            m.max = glm.vec3 ( acc.max )
+    print ( gltf.nodes [0].__dict__ )
+    print ( 'NODE', Node ( gltf.nodes [0] ) )
+    
+
+    #for i in range(len(gltf.accessors)):
+    #    acc = gltf.accessors [i]
+    #    if acc.min:
+    #        print ( 'min/max', acc.min, acc.max )
+    #        m.min = glm.vec3 ( acc.min )
+    #        m.max = glm.vec3 ( acc.max )
 
     for t in gltf.images:
         #print ( type(t), t )
@@ -88,15 +338,15 @@ def loadGltf ( filename ):
         m.mrTex     = m.textures [m.materials[0]['metallicRoughness']]
         m.normalTex = m.textures [m.materials[0]['normal']]
 
+    #sys.exit ( 0 )
+    
     print ( m.textures )
     return m
 
 #filename = 'glTF-Sample-Models/2.0/BoxTextured/glTF-Binary/BoxTextured.glb'
 #filename = 'beretta-m9/scene.gltf'
 filename = 'glTF-Sample-Models/2.0/Avocado/glTF/Avocado.gltf'
-
-#mesh = loadGltf ( filename )
-#print ( mesh )
+#filename = 'glTF-Sample-Models/2.0/SimpleSkin/glTF/SimpleSkin.gltf'
 
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
@@ -106,9 +356,14 @@ class   MyWindow ( Window.RotationWindow ):
         self.mesh     = loadGltf ( filename )
         self.shader   = Program.Program ( glsl = "pbr-2.glsl" )
         self.shader.use ()
-        self.mesh.colorTex.bind  ( 0 )
-        self.mesh.mrTex.bind     ( 1 )
-        self.mesh.normalTex.bind ( 2 )
+		
+        if hasattr ( self.mesh, 'colorTex' ):
+            self.mesh.colorTex.bind  ( 0 )
+        if hasattr ( self.mesh, 'mrTex' ):
+            self.mesh.mrTex.bind     ( 1 )
+        if hasattr ( self.mesh, 'normalTex' ):
+            self.mesh.normalTex.bind ( 2 )
+			
         self.shader.setTexture ( 'albedoMap', 0 )
         self.shader.setTexture ( 'mrMap',     1 )
         self.shader.setTexture ( 'normalMap', 2 )

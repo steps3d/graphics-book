@@ -5,7 +5,7 @@ import numpy
 from PIL import Image
 
 def  _loadImage2D ( target, image ):
-    print ( image.mode, image.width, image.height )
+    #print ( image.mode, image.width, image.height )
     if image.mode == 'L':			# handle paletted images
         image = image.convert ( mode = 'RGB' )
 			
@@ -45,6 +45,10 @@ class    Texture:
             if mipmaps:
                 glGenerateMipmap ( self.target )
 
+    def __del__ ( self ):
+	    #glDeleteTextures ( self.id )
+        pass
+
     @classmethod
     def createEmpty ( cls, width, height, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
         tex        = Texture ( filename = None, target = target, clamp = clamp, filter = filter )
@@ -65,6 +69,17 @@ class    Texture:
 		
         tex.bind ()
         glTexImage3D ( tex.target, 0, intFormat,  width, height, depth, 0, format, GL_UNSIGNED_BYTE, None )
+
+        return tex
+	
+    @classmethod
+    def createEmptyCubemap ( cls, width, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
+        tex        = Texture ( filename = None, target = GL_TEXTURE_CUBE_MAP, clamp = clamp, filter = filter )
+        tex.width  = width
+        tex.height = width
+		
+        tex.bind ()
+        #glTexImage3D ( tex.target, 0, intFormat,  width, height, depth, 0, format, GL_UNSIGNED_BYTE, None )
 
         return tex
 	
