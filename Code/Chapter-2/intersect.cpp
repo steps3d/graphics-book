@@ -37,7 +37,7 @@ bool findLineIntersection ( const glm::vec2& n1, float d1,
 }
 
 bool findSegIntersection ( const glm::vec2& a1, const glm::vec2& b1,
-                           const glm::vec2& a1, const glm::vec2& b2,
+                           const glm::vec2& a2, const glm::vec2& b2,
                            glm::vec2& p )
 {
 	const glm::vec2 l1 = b1 - a1;
@@ -47,21 +47,33 @@ bool findSegIntersection ( const glm::vec2& a1, const glm::vec2& b1,
 	const float     d1 = -glm::dot ( a1, n1 );
 	const float     d2 = -glm::dot ( a2, n2 );
 
-		// use determinant s to check for coinsiding
+		// use determinants to check for coinsiding
 		// since vectors are normalized
 	const float t1 = n1.x*n2.y - n1.y*n2.x;
 	const float t2 = n1.x*d2   - n2.x*d1;
 
+		// check for degenerate case
 	if ( fabs ( t1 ) < EPS && fabs ( t2 ) < EPS )
 	{
-		if ( fabs ( d1.x ) > EPS ) // project on Ox
+		if ( fabs ( a1.x ) > EPS ) // project on Ox
 		{
-			return min( a1.x , a2.x ) <= min( b1.x , b2.x );
+			if ( max ( a1.x , a2.x ) > min ( b1.x , b2.x ) )
+				return false;
+
+				// pick a1 or a2 as start of intersection
+			p = ( a1.x > a2.x ? a1 : a2 );
+
+			return true;
 		}
 		else
-		if ( fabs ( d1.y ) > EPS ) // project on Oy
+		if ( fabs ( a1.y ) > EPS ) // project on Oy
 		{
-			return min( a1.y , a2.y ) <= min( b1.y , b2.y );
+			if ( max ( a1.y , a2.y ) > min ( b1.y , b2.y ) )
+				return false;
+
+			p = ( a1.y > a2.y ? a1 : a2 );
+
+			return true;
 		}
 
 		return false;	// incorrect data
@@ -70,8 +82,13 @@ bool findSegIntersection ( const glm::vec2& a1, const glm::vec2& b1,
 	const float     det = n1.x * n2.y - n1.y * n2.x;
 	const glm::vec2 p0 ( d2*n1.y - d1*n2.y, d1*n2.x - d2*n1.x )/det;
 
-	return min( a1.x, b1.x ) <= p0.x &&
+	bool  res = min( a1.x, b1.x ) <= p0.x &&
 	       p0.x <= max( a1.x, b1.x ) &&
 	       min( a1.y, b1.y ) <= p0.y &&
 	       p0.y <= max( a1.y, b1.y );
+
+	if ( res )
+		p = p0;
+
+	return res;
 }
