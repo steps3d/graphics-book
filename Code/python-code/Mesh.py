@@ -240,14 +240,14 @@ class NewMesh:
 
         if self.indices is not None:    # must be already be Buffer object
             if self.indexType == GL_UNSIGNED_BYTE:
-                 indexSize = 1
-                 dtype     = numpy.uint8
+                indexSize = 1
+                dtype     = numpy.uint8
             elif self.indexType == GL_UNSIGNED_SHORT:
-                 indexSize = 2
-                 dtype     = numpy.uint16
+                indexSize = 2
+                dtype     = numpy.uint16
             if self.indexType == GL_UNSIGNED_INT:
-                 indexSize = 4
-                 dtype     = numpy.uint32
+                indexSize = 4
+                dtype     = numpy.uint32
 
             self.indices.bind ( GL_ELEMENT_ARRAY_BUFFER )   #glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, self.indices.id )
             #glBufferData ( GL_ELEMENT_ARRAY_BUFFER, len(self.indices)*indexSize, numpy.array(self.indices, dtype = dtype), GL_STATIC_DRAW )
@@ -262,14 +262,12 @@ class NewMesh:
             else:           # integer data type
                 glVertexAttribIPointer    ( index, numComponents, dtype, stride, ctypes.c_void_p(offs) )
                 glEnableVertexAttribArray ( index )
-                        
         glBindVertexArray ( 0 )
 
     def addAttribute ( self, name, buffer, index, dtype, numComponents, stride, offs, normalized = False ):
         self.attributes [name] = (index, buffer, numComponents, dtype, stride, offs, normalized )
         self.stride            = stride
         #print ( 'stride', stride )
-        
     #def setVertexBuffer ( self, buffer, numVertices ):
     #    self.vertices    = buffer
     #    self.numVertices = numVertices
@@ -281,7 +279,6 @@ class NewMesh:
         self.indexOffs  = offs
         self.numIndices = numIndices
         #print ( 'setIndexBuffer', buffer, numIndices, dtype, buffer )
-        
     def render ( self ):
         glBindVertexArray ( self.vao )
         if self.indices:

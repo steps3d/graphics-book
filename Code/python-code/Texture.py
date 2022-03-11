@@ -1,11 +1,14 @@
-import glfw
-from OpenGL.GL import *
-import OpenGL.GL.shaders
+#import glfw
+#from OpenGL.GL import *
+from OpenGL.GL import glGenTextures, glPixelStorei, glTexImage2D, glTexImage3D, glBindTexture, glTexParameteri, glGenerateMipmap, glActiveTexture
+from OpenGL.GL import GL_UNPACK_ALIGNMENT, GL_RGB, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D, GL_TEXTURE_CUBE_MAP
+from OpenGL.GL import GL_LINEAR, GL_NEAREST,GL_REPEAT, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_TEXTURE_WRAP_R, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER
+from OpenGL.GL import GL_RGBA8, GL_TEXTURE0, GL_TEXTURE_BASE_LEVEL, GL_TEXTURE_CUBE_MAP_POSITIVE_X
+#import OpenGL.GL.shaders
 import numpy
 from PIL import Image
 
 def  _loadImage2D ( target, image ):
-    #print ( image.mode, image.width, image.height )
     if image.mode == 'L':			# handle paletted images
         image = image.convert ( mode = 'RGB' )
 			
@@ -40,23 +43,24 @@ class    Texture:
             image       = Image.open ( filename )
             self.width  = image.width
             self.height = image.height
+            self.depth  = 1
             _loadImage2D ( self.target, image )
 
             if mipmaps:
                 glGenerateMipmap ( self.target )
 
     def __del__ ( self ):
-	    #glDeleteTextures ( self.id )
+        #glDeleteTextures ( self.id )
         pass
 
     @classmethod
-    def createEmpty ( cls, width, height, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
+    def createEmpty ( cls, width, height, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, fmt = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
         tex        = Texture ( filename = None, target = target, clamp = clamp, filter = filter )
         tex.width  = width
         tex.height = height
 
         tex.bind ()
-        glTexImage2D ( tex.target, 0, intFormat,  width, height, 0, format, GL_UNSIGNED_BYTE, None )
+        glTexImage2D ( tex.target, 0, intFormat,  width, height, 0, fmt, GL_UNSIGNED_BYTE, None )
 
         return tex
 
@@ -103,21 +107,21 @@ class    Texture:
 
 class	CubeTexture:
     def __init__ ( self, names ):
-        assert len(name) == 6, "For cube map we need exactly 6 images"
+        assert len(names) == 6, "For cube map we need exactly 6 images"
         self.id       = glGenTextures ( 1 )
         self.target   = GL_TEXTURE_CUBE_MAP
         glBindTexture ( self.target, self.id )
 
-			# Set the texture wrapping parameters
+            # Set the texture wrapping parameters
         glTexParameteri ( self.target, GL_TEXTURE_WRAP_S, GL_REPEAT )
         glTexParameteri ( self.target, GL_TEXTURE_WRAP_T, GL_REPEAT )
         glTexParameteri ( self.target, GL_TEXTURE_WRAP_R, GL_REPEAT )
 
-			# Set texture filtering parameters
+            # Set texture filtering parameters
         glTexParameteri ( self.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
         glTexParameteri ( self.target, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
 
-			# load image
+            # load image
         images = [Image.open ( name ) for name in names]
         self.width  = images [0].width
         self.height = images [0].height

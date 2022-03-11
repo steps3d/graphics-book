@@ -84,6 +84,10 @@ class Window:
         self.width           = w
         self.height          = h
         self.title           = title
+        self.frameNo         = 0
+        self.frameTime       = [0, 0, 0, 0, 0]
+        self.fps             = 0.0
+        self.showFps         = True
         self.screenshotCount = 1
         self.screenshotName  = 'screenshot'
 
@@ -190,7 +194,18 @@ class Window:
             glfw.poll_events  ()
             self.redisplay    ()
             glfw.swap_buffers ( self.window )
+            self.updateFps    ()
         glfw.terminate()
+    def updateFps ( self ):
+        for i in range ( len ( self.frameTime ) - 1 ):
+            self.frameTime [i] = self.frameTime [i+1]
+
+        self.frameTime [-1] = self.time ()
+        self.fps            = len ( self.frameTime ) / ( self.frameTime [-1] - self.frameTime [0] + 0.001 )
+        self.frameNo       += 1
+
+        if self.showFps and (self.frameNo % 5) == 0:
+            glfw.set_window_title ( self.window, self.title + f' FPS {self.fps:.1f}' )
 
 class RotationWindow (Window):
     def __init__ ( self, w, h, title, depth = True, stencil = False, resizable = True  ):

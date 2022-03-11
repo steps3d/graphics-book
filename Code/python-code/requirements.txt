@@ -3,4 +3,4 @@ glfw
 pyglm 
 pillow 
 numpy-stl
-pygltflib
+pygltf

@@ -3,7 +3,11 @@
     Can load from separate shader files or a composite .glsl file
 """
 
-from OpenGL.GL import *
+#from OpenGL.GL import *
+from OpenGL.GL import GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_COMPUTE_SHADER, GL_FALSE, GL_TRUE, GL_FLOAT
+from OpenGL.GL import glUseProgram, glGetUniformLocation,glUniform1i, glUniform1f   #, glUniform2f, glUniform3f, glUniform4f
+from OpenGL.GL import  glUniform2fv, glUniform3fv, glUniform4fv, glUniformMatrix2fv, glUniformMatrix3fv, glUniformMatrix4fv
+from OpenGL.GL import  glVertexAttribPointer, glVertexAttribIPointer, glEnableVertexAttribArray
 import OpenGL.GL.shaders
 import glm
 
@@ -74,7 +78,7 @@ class    Program:
                 if line.lstrip ().startswith ( '#version' ) and defines:
                         # add defines
                     for k in defines:
-                        res = res + f'#define {k}\t\t{d[k]}\n'
+                        res = res + f'#define {k}\t\t{defines[k]}\n'
             
                 if line.lstrip ().rstrip ().startswith ( "--" ):        # new shader startswith
                     curr = line.lstrip ().rstrip () [2:].lower ().split () [0]
@@ -125,8 +129,7 @@ class    Program:
             if line.lstrip ().startswith ( '#version' ) and defines:
                     # add defines
                 for k in defines:
-                    res = res + f'#define {k}\t\t{d[k]}\n'
-            
+                    res = res + f'#define {k}\t\t{defines[k]}\n'
                 # add line as it is
             res = res + line + '\n'
         return res
@@ -200,28 +203,26 @@ class    Program:
         else:
             assert True, f"Invalid matrix type {type(value)}"
 
-    def setAttrPtr ( self, name, numComponents, stride, offs, type = GL_FLOAT, normalized = False ):
+    def setAttrPtr ( self, name, numComponents, stride, offs, attrType = GL_FLOAT, normalized = False ):
         loc = glGetUniformLocation ( self.program, name )
         if loc < 0:
             return
-            
-        glVertexAttribPointer ( loc,                         # index
-                                numComponents,                 # number of values per vertex
-                                type,                         # type (GL_FLOAT)
+        glVertexAttribPointer ( loc,                       # index
+                                numComponents,             # number of values per vertex
+                                attrType,                  # type (GL_FLOAT)
                                 GL_TRUE if normalized else GL_FALSE,
-                                stride,                     # stride (offset to next vertex data)
+                                stride,                    # stride (offset to next vertex data)
                                 offs )
         
         glEnableVertexAttribArray ( loc )
 
-    def setIntAttrPtr ( self, name, numComponents, stride, offs, type, normalized = False ):
+    def setIntAttrPtr ( self, name, numComponents, stride, offs, attrType, normalized = False ):
         loc = glGetUniformLocation ( self.program, name )
         if loc < 0:
             return
-            
-        glVertexAttribIPointer ( loc,                         # index
-                                numComponents,                 # number of values per vertex
-                                type,                         # type (GL_FLOAT)
+        glVertexAttribIPointer ( loc,                       # index
+                                numComponents,              # number of values per vertex
+                                attrType,                   # type (GL_FLOAT)
                                 stride,                     # stride (offset to next vertex data)
                                 offs )
         

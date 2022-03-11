@@ -45,8 +45,7 @@ class   Framebuffer:
         return no
 
     def createTexture ( self, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
-	    return Texture.Texture.createEmpty ( self.width, self.height, target = target, intFormat = intFormat, format = format, clamp = clamp, filter = filter )
-		
+        return Texture.Texture.createEmpty ( self.width, self.height, target = target, intFormat = intFormat, format = format, clamp = clamp, filter = filter )
     def attachDepthTexture ( self, tex ):
         assert self.id != 0, "Must have a valid framebuffer object"
         assert self.width == tex.width and self.height == tex.height, "Texture size must match to framebuffer"
@@ -61,7 +60,7 @@ class   Framebuffer:
         assert self.id != 0, "Must have a valid framebuffer object"
         assert self.width == tex.width and self.height == tex.height, "Texture size must match to framebuffer"
         assert tex.target == GL_TEXTURE_CUBE_MAP
-        assert face >= 0 and face <= 5, "Cube map face must be in 0..5 range"
+        assert 0 <= face <= 5, "Cube map face must be in 0..5 range"
 
         no = len ( self.colorBuffers )
         self.colorBuffers.append ( tex )
@@ -76,14 +75,14 @@ class   Framebuffer:
 
         no = len ( self.colorBuffers )
 
-        colorBuffers.append ( tex )
-        glBindTexture          ( GL_TEXTURE_3D, tex.id );
-        glFramebufferTexture3D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, GL_TEXTURE_3D, tex.id, 0, sOffs );
+        self.colorBuffers.append ( tex )
+        glBindTexture          ( GL_TEXTURE_3D, tex.id )
+        glFramebufferTexture3D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, GL_TEXTURE_3D, tex.id, 0, sOffs )
 
     def __enter__ ( self ):
         self.bind ()
 
-    def __exit__ ( self ):
+    def __exit__ ( self, tp, value, tb ):
         self.unbind ()
 
     def bind ( self ):
@@ -98,7 +97,7 @@ class   Framebuffer:
         glViewport        ( 0, 0, self.width, self.height )
 
     def bindFace ( self, face ):
-        glFramebufferTexture2D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, self.colorBufer [0].id, 0 )
+        glFramebufferTexture2D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, self.colorBuffers [0].id, 0 )
 
     def unbind ( self ):
         assert self.id != 0
@@ -109,7 +108,7 @@ class   Framebuffer:
 
     def drawBuffers ( self, count ):
         buffers = tuple ( GL_COLOR_ATTACHMENT0 + i for i in range ( count ) )
-        glDrawBuffer ( no, buffers )
+        glDrawBuffer ( no, buffers )    # XXX
 
     def buildMipmaps ( self, no ):
         assert self.id != 0
