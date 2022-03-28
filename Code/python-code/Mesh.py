@@ -114,13 +114,14 @@ class    Mesh:
         glDrawElements( GL_TRIANGLES, len(self.indices), GL_UNSIGNED_INT, None )
 
     @classmethod
-    def createBox ( cls, pos, size, mat = None, invertNormal = False ):
+    def createBox ( cls, pos, size, mat = None, invertNormal = False, offs = glm.vec3(0) ):
+        def unvec ( *v ):
+            return v
+        
         x2          = pos.x + size.x
         y2          = pos.y + size.y
         z2          = pos.z + size.z
         ns          = -1.0 if invertNormal else 1.0
-        #numVertices = 4*6            # 4 vertices per each face
-        #numTris     = 6*2           # 2 tris per face
         mesh        = Mesh ()
 
                                     # front face
@@ -164,10 +165,59 @@ class    Mesh:
             mesh.addFace ( face * 4 + 2, face * 4 + 3, face * 4     )
 
         if mat is not None:
-            pass
+            nm = glm.inverseTranspose( glm.mat3 ( mat ) )       # matrix to transform directions
+            
+            for index in range ( len(self.vertices) // 14 ):    # process every vertex
+                i   = index * 14
+                                                                # repack data from self.vertices and transform
+                p   = mat * glm.vec3 ( self.vertices [i:i+3]     ) + offs
+                n   = nm  * glm.vec3 ( self.vertices [i+5:i+8]   )
+                t   = nm  * glm.vec3 ( self.vertices [i+8:i+11]  )
+                b   = nm  * glm.vec3 ( self.vertices [i+11:i+14] )
+                                                                # pack transformed values back
+                self.vertices [i:i+3]     = unvec ( *p )
+                self.vertices [i+5:i+8]   = unvec ( *n )
+                self.vertices [i+8:i+11]  = unvec ( *t )
+                self.vertices [i+11:i+14] = unvec ( *b )
 
         mesh.create ()
 
+        return mesh
+
+    @classmethod
+    def createSphere ( cls, center, r, n1, n2 ):
+        #numVertices = (n1+1) * (n2+1)
+        #numTris     = n1 * n2 * 2
+        d1          = 1.0 / n1
+        d2          = 1.0 / n2
+        deltaPhi    = d1 * math.pi
+        deltaPsi    = d2 * 2.0 * math.pi
+        index       = 0
+        mesh        = Mesh ()
+        
+        for i in range ( n1 + 1 ):
+            phi    = i * deltaPhi
+            sinPhi = math.sin ( phi )
+            cosPhi = math.cos ( phi )
+            
+            for j in range ( n2 + 1 ):
+                psi = j * deltaPsi
+                n   = glm.vec3 ( sinPhi * math.cos ( psi ), sinPhi * math.sin ( psi ), cosPhi )
+                p   = center + r * n
+                tex = glm.vec2  ( i * d1, j * d2 )
+                t   = glm.vec3  ( math.sin ( psi ), -math.cos ( psi ), 0 )
+                b   = glm.cross ( n, t )
+                mesh.addVertex ( p, tex, n, t, b )
+                
+        for i in range ( n1 ):
+            for j in range ( n2 ):
+                i1 = i + 1
+                j1 = j + 1
+                mesh.addFace ( i*(n2+1) + j, i1*(n2+1) + j,  i1*(n2+1) + j1 )
+                mesh.addFace ( i*(n2+1) + j, i1*(n2+1) + j1, i*(n2+1)  + j1 )
+                
+        mesh.create ()
+        
         return mesh
 
     @classmethod
@@ -191,8 +241,6 @@ class    Mesh:
         sideDelta   = 2.0 * math.pi / sides
         invRings    = 1.0 / rings
         invSides    = 1.0 / sides
-        #numVertices = (sides+1)*(rings+1)
-        #numTris     = sides * rings * 2
         mesh        = Mesh ()
 
         for i in range ( rings + 1 ):
@@ -214,6 +262,8 @@ class    Mesh:
         mesh.create ()
 
         return mesh
+
+
 
 
 class NewMesh:
