@@ -28,7 +28,7 @@ int main ( int argc, char * argv [] )
 	glm::vec2 d = a + 2.0f*c;
 	glm::vec2 e = -d;
 	glm::vec2 f = glm::normalize(e);
-	glm::vec2 a2(a.xy);
+	glm::vec2 a2(a.xy());
 	glm::vec2 b2(a.xy());
 	
 	float dot2 = glm::dot(glm::vec2(1), d);
