@@ -11,17 +11,17 @@
 int main ()
 {
 	glm::vec3 a = glm::vec3(1.0f, 2.0f, 3.0f);
-	glm::vec3 b = a.xyz;
-	glm::vec3 c(a.xyz);
+	glm::vec3 b = a.xyz();
+	glm::vec3 c(a.xyz());
 	glm::vec3 d(a.xyz());
-	glm::vec3 e(a.x, a.yz);
+	glm::vec3 e(a.x, a.yz());
 	glm::vec3 g (1);
 	glm::vec3 h = a + b;
 	float	  r = glm::dot ( a, b );
 	glm::vec3 p = glm::cross ( b, c );
 
 	glm::vec4 a4 = glm::vec4(1.0f, 2.0f, 3.0f, 4.0f);
-	glm::vec4 b4 (a4.xy, a4.z, a4.w);
+	glm::vec4 b4 (a4.xy(), a4.z, a4.w);
 	
 	glm::mat3 l(1.0f);
 	glm::vec3 a1 = l * a;
