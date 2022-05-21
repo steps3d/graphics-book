@@ -4,44 +4,54 @@
 // Author: Alexey V. Boreskov, <steps3d@gmail.com>, <steps3d@narod.ru>
 //
 
+#include	<iostream>
+#include	<fstream>
 #include	"Log.h"
 
 #ifdef	_WIN32
-#include	<windows.h>
+	#include	<windows.h>
 #endif
 
-Log :: Log ( const char * logFileName ) : str ()
+//static	Log	appLog ( "" );		// create application log
+Log::endl__	Log::endl;			// creat end-of-line marker
+
+Log& Log::flush ()
 {
-	if ( logFileName != nullptr )
-		logName = logFileName;
-}
-
-Log :: ~Log ()
-{
-
-}
-
-Log& Log :: flush ()
-{
-	puts ( str.c_str () );
-
+	std::string	temp = s.str ();	// get string from stream
+		
+	s.str ( std::string () );		// clear stream
+	
+//	temp += '\n';
+	
+	puts ( temp.c_str () );
+	
+#ifdef	_WIN32
+	OutputDebugString ( temp.c_str () );
+#endif
 	if ( !logName.empty () )
 	{
-		FILE * fp = fopen ( logName.c_str (), "at" );
+		std::ofstream file;
 
-		if ( fp != nullptr )
-		{
-			str += '\n';
-
-			fputs  ( str.c_str (), fp );
-			fclose ( fp );
-		}
+		file.open ( logName, std::ios::app );
+		file << temp << std::endl;
 	}
-
-#ifdef	_WIN32
-	OutputDebugString ( str.c_str () );
-#endif
-	str.clear ();
+		
+//assert (_heapchk () == _HEAPOK );
 
 	return *this;
+}
+
+Log& log ( int level )
+{
+	static	Log	appLog2 ( "" );		// create application log
+
+//assert (_heapchk () == _HEAPOK );
+
+	return appLog2;
+}
+
+Log& fatal ()
+{
+	//return appLog << Log::fatal__ ();
+	return log () << Log::fatal__ ();
 }

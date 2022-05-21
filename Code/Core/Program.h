@@ -8,8 +8,9 @@
 #ifndef __GLSL_PROGRAM__
 #define __GLSL_PROGRAM__
 
-#include    <GL/glew.h>
-#include    <string>
+#include	<GL/glew.h>
+#include	<string>
+#include	<iostream>
 
 #define GLM_FORCE_RADIANS
 
@@ -17,30 +18,52 @@
 	#define GLM_SWIZZLE
 #endif
 
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/vec2.hpp>
-#include <glm/matrix.hpp>
-#include <glm/mat3x3.hpp>
-#include <glm/mat4x4.hpp>
+#include	<glm/vec3.hpp>
+#include	<glm/vec4.hpp>
+#include	<glm/vec2.hpp>
+#include	<glm/matrix.hpp>
+#include	<glm/mat3x3.hpp>
+#include	<glm/mat4x4.hpp>
+
+inline std::ostream& operator << ( std::ostream& stream, const glm::vec2& v )
+{ 
+	stream << "vec2(" << v.x << ", " << v.y << ")";
+
+	return stream;
+}
+
+inline std::ostream& operator << ( std::ostream& stream, const glm::vec3& v )
+{ 
+	stream << "vec2(" << v.x << ", " << v.y << ", " << v.z << ")";
+
+	return stream;
+}
+
+inline std::ostream& operator << ( std::ostream& stream, const glm::vec4& v )
+{ 
+	stream << "vec2(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
+
+	return stream;
+}
 
 class   Data;
 
 class   Program
 {
 protected:
-	GLuint			program;       // program object handle
+	GLuint			program;		// program object handle
 	GLuint			vertexShader;
 	GLuint			fragmentShader;
 	GLuint			geometryShader;
 	GLuint			tessControlShader;
 	GLuint			tessEvalShader;
 	GLuint			computeShader;
-	bool    		ok;            // whether program is loaded and ready to be used
+	bool    		ok;      		// whether program is loaded and ready to be used
 	bool			linkRequired;
 	std::string		glError;
 	std::string		log;
 	bool			separate;
+	std::string		fileName;		// original file with program
 
 									// disable copying
 public:
@@ -52,11 +75,11 @@ public:
 	
 	void destroy ();
 												// load all shaders separated by -- shader-type
-	bool	loadProgram           ( const std::string& fileName );
+	bool	loadProgram           ( const std::string& file );
 	bool	loadProgram           ( Data * data );
 	bool	loadProgramFromString ( const std::string& source );
 	bool	loadSeparate          ( GLenum type, Data * data );
-	bool	loadSeparate          ( GLenum type, const std::string& fileName );
+	bool	loadSeparate          ( GLenum type, const std::string& file );
 	
 												// load and compile a single shader, no linking
 	bool	loadShaderOfType ( Data * data, GLenum type );
@@ -211,6 +234,12 @@ public:
 	static	int maxTessEvalOutputComponents  ();
 	static	int	maxTessEvalUniformComponents ();
 	static	int maxCombinedTessEvalUniformComponents ();
+	friend inline std::ostream& operator << ( std::ostream& stream, const Program& p )
+	{ 
+		stream << "Program(\"" << p.fileName << "\")";
+
+		return stream;
+	}
 
 protected:
 	bool    loadShader     ( GLuint shader, Data * data );

@@ -9,6 +9,7 @@
 #define	__VERTEX_BUFFER_CLASS__
 
 #include	<GL/glew.h>
+#include	<vector>
 
 class	VertexBuffer
 {
@@ -50,6 +51,11 @@ public:
 	void	resetData  ();			// free allocated memory
 	void  * map        ( GLenum access );
 	bool	unmap      ();
+	template <typename T>
+	void	setData ( std::vector<T>& data, GLenum usage = GL_STATIC_DRAW )
+	{
+		setData ( data.size () * sizeof ( T ), data.data (), usage );
+	}
 
 	void	clear ()
 	{

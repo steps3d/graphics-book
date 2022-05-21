@@ -8,6 +8,7 @@
 #include	"Camera.h"
 #include	"common.h"
 #include	"plane.h"
+#include	"bbox.h"
 
 #define GLM_ENABLE_EXPERIMENTAL				// for GLM_GTX_euler_angles
 
@@ -173,3 +174,46 @@ void	Camera :: getPlanePolyForZ ( float z, glm::vec3 * poly ) const
 	poly [2] = glm::vec3 ( mvInv * glm::vec4 ( base * glm::vec3 (  1,  1, 1 ), 1.0 ) );
 	poly [3] = glm::vec3 ( mvInv * glm::vec4 ( base * glm::vec3 (  1, -1, 1 ), 1.0 ) );
 }
+bool	Camera::bboxVisible ( const bbox& box ) const
+{
+	glm::mat4	m ( proj );
+
+	plane	left (  m [3][0] + m [0][0], 
+			m [3][1] + m [0][1], 
+			m [3][2] + m [0][2],
+			m [3][3] + m [0][3] );
+
+	plane	right(  m [3][0] - m [0][0], 
+			m [3][1] - m [0][1], 
+			m [3][2] - m [0][2],
+			m [3][3] - m [0][3] );
+
+	plane	bottom ( m [3][0] + m [1][0],
+			 m [3][1] + m [1][1],
+			 m [3][2] + m [1][2],
+			 m [3][3] + m [1][3] );
+
+	plane	top (    m [3][0] + m [1][0],
+			 m [3][1] + m [1][1],
+			 m [3][2] + m [1][2],
+			 m [3][3] + m [1][3] );
+
+	plane	near (   m [3][0] + m [2][0],
+			 m [3][1] + m [2][1],
+			 m [3][2] + m [2][2],
+			 m [3][3] + m [2][3] );
+
+	plane	far (    m [3][0] - m [2][0],
+			 m [3][1] - m [2][1],
+			 m [3][2] - m [2][2],
+			 m [3][3] - m [2][3] );
+
+
+	return  (box.classify ( left   ) != IN_BACK) &&
+		(box.classify ( right  ) != IN_BACK) &&
+		(box.classify ( bottom ) != IN_BACK) &&
+		(box.classify ( top    ) != IN_BACK) &&
+		(box.classify ( far    ) != IN_BACK) &&
+		(box.classify ( near   ) != IN_BACK);
+}
+

@@ -15,9 +15,10 @@ class	Texture
 {
 	GLuint		id;
 	GLenum		target;
-	int		width, height, depth;
+	int			width, height, depth;
 	bool		autoMipmaps;	// load mipmaps or create if cannot load
-	int		unit;			// texture unit texture is bound to
+	int			unit;			// texture unit texture is bound to
+	std::string	fileName;
 	
 public:
 	explicit Texture  ( bool theAutoMipmaps = true );
@@ -86,6 +87,9 @@ public:
 	bool	loadCubemap    ( const char * f1, const char * f2, const char * f3, const char * f4, const char * f5, const char * f6 );
 	bool	load2DHdr      ( const std::string& fileName );
 	bool	loadCubemapHdr ( const std::string& fileName );
+	
+	bool	load2D         ( const void * ptr, size_t len, const std::string& file = "" );
+	bool	loadCubemap    ( const void * ptr, size_t len );
 	
 							// load cubemap from a list of , or ; separated list of names
 	bool	loadCubemapFromNames ( const char * fileNames );

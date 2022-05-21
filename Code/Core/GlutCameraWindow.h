@@ -106,10 +106,10 @@ public:
 			pitch -= M_PI / 90;
 		else
 		if ( key == GLUT_KEY_RIGHT )
-			yaw -= M_PI / 90;
+			yaw += M_PI / 90;
 		else
 		if ( key == GLUT_KEY_LEFT )
-			yaw += M_PI / 90;
+			yaw -= M_PI / 90;
 
 		camera.setEulerAngles ( yaw, pitch, roll );
 
@@ -127,8 +127,8 @@ public:
 			lastY = y;
 		}
 
-		yaw   += (x - lastX) * 0.01;
-		pitch += (y - lastY) * 0.01;
+		yaw   += (x - lastX) * 0.01f;
+		pitch += (y - lastY) * 0.01f;
 		lastX  = x;
 		lastY  = y;
 

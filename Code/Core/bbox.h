@@ -12,13 +12,16 @@
 #define GLM_SWIZZLE
 #include <glm/vec3.hpp>
 #include <glm/geometric.hpp>
+#include <glm/gtc/type_ptr.hpp>			// for make_mat
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <limits>
 #include "plane.h"
 
 class   bbox
 {
-    glm::vec3    minPoint;
-    glm::vec3    maxPoint;
+	glm::vec3    minPoint;
+	glm::vec3    maxPoint;
 
 public:
 	bbox ()
@@ -90,14 +93,15 @@ public:
 		return true;
 	}
 
+		// spceify empty bbox: min=inf, max=-inf
 	void    reset ()
 	{
-		minPoint.x = std::numeric_limits<float>::max();
-		minPoint.y = std::numeric_limits<float>::max();
-		minPoint.z = std::numeric_limits<float>::max();
-		maxPoint.x = std::numeric_limits<float>::min();
-		maxPoint.y = std::numeric_limits<float>::min();
-		maxPoint.z = std::numeric_limits<float>::min();
+		minPoint.x =  std::numeric_limits<float>::max();
+		minPoint.y =  std::numeric_limits<float>::max();
+		minPoint.z =  std::numeric_limits<float>::max();
+		maxPoint.x = -std::numeric_limits<float>::max();
+		maxPoint.y = -std::numeric_limits<float>::max();
+		maxPoint.z = -std::numeric_limits<float>::max();
 	}
 
 	void merge ( const bbox& box )
@@ -157,6 +161,19 @@ public:
 		return (size.x*size.y + size.x*size.z + size.y*size.z) * 2;
 	}
 
+	void	apply ( const glm::mat4& m )
+	{
+		if ( isEmpty () )		// leave it empty
+			return;
+
+		auto	mn = m * glm::vec4 ( minPoint, 1 );
+		auto	mx = m * glm::vec4 ( maxPoint, 1 );
+		auto	minNew = glm::vec3 ( mn.x, mn.y, mn.z ) / mn.w;
+		auto	maxNew = glm::vec3 ( mx.x, mx.y, mx.z ) / mx.w;
+
+		minPoint = glm::min ( minNew, maxNew );
+		maxPoint = glm::max ( minNew, maxNew );
+	}
 /*
 									// distance from point along given direction to this box
 	float	getDistanceTo ( const vec3& from, const vec3& dir ) const
@@ -183,7 +200,7 @@ public:
 		if ( dist < 0 )						// box lies in negative halfspace
 			return dist;
 
-		return 0;							// plane crosses this box
+		return 0;						// plane crosses this box
 	}
 };
 

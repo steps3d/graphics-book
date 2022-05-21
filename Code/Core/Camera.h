@@ -19,6 +19,7 @@
 #include "plane.h"
 
 class	quat;
+class	bbox;
 
 class   Camera
 {
@@ -142,6 +143,7 @@ public:
 
 											// return poly (quad) for intersection of plane paraller to zNear plane with given z
 	void	getPlanePolyForZ ( float z, glm::vec3 * poly ) const;
+	bool	bboxVisible ( const bbox& box ) const;
 	
 private:
 	void    computeMatrix ();				// compute vectors, transform matrix and build

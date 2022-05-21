@@ -14,6 +14,7 @@
 #endif
 
 #include	<string>
+#include	<sstream>
 #include	<GL/freeglut.h>
 #include	"common.h"
 
@@ -21,6 +22,37 @@
 	#define	CALLBACK
 #endif
 
+class	MakeStr
+{
+	std::stringstream	s;
+	std::string			temp;
+	
+public:
+	MakeStr  () = default;
+	~MakeStr () = default;
+
+	template <typename T>
+	MakeStr& operator << ( T value )
+	{
+		s << value;
+
+		return *this;
+	}
+
+	/*std::string*/ operator std::string ()
+	{
+		temp = s.str ();
+		
+		return temp;
+	}
+
+	const char * c_str ()
+	{
+		temp = s.str ();
+		
+		return temp.c_str ();
+	}
+};
 class	GlutWindow
 {
 	std::string	caption;
@@ -116,6 +148,11 @@ public:
 		else
 			glutLeaveFullScreen ();
 	}
+	
+	void	setWindowSize ( int w, int h )
+	{
+		glutReshapeWindow ( w, h );
+	}
 						// called by display to readraw window contents
 	virtual	void	redisplay () {}
 	
@@ -160,10 +197,12 @@ public:
 	}
 	
 	bool	makeScreenshot ( const char * fileName ) const;
+	void	exit ( MakeStr& str );
 	void 	exit ( const char * fmt, ... );
 	
 	static	void	init ( int& argc, char ** argv, int major = 4, int minor = 3, 
 	                       unsigned mode = GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH, bool debug = true, int _numSamples = 1 );
+	static	bool	hideExtendedErrors;	// hide NV-specific errors with large error ids
 };
 
 const char * getGlErrorString ();

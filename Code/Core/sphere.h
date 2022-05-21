@@ -17,6 +17,7 @@ public:
 	sphere ( const glm::vec3& c, float r ) : center ( c ), radius ( r ) {}
 	sphere ( const glm::vec3 * v, int n );
 	sphere ( const bbox& box );
+	sphere () {}
 
 	const glm::vec3& getCenter () const
 	{

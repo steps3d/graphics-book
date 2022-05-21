@@ -29,6 +29,7 @@ static  int				            mode = 0;
 static  int				            numSamples = 1;
 static	std::string			        appName;
 
+bool	GlutWindow::hideExtendedErrors = true;
 static void	redisplayFunc ()
 {
 	GlutWindow * window = windows[glutGetWindow()];
@@ -186,6 +187,8 @@ static void	CALLBACK _errorCallback ( GLenum source, GLenum type, GLuint id,
                                      GLenum severity, GLsizei length, const GLchar * message, GLvoid * userParam )
 {
 	GlutWindow * window = (GlutWindow *) userParam;
+	if ( GlutWindow::hideExtendedErrors && id > 65535 )
+		return;
 	
 	if ( window == nullptr )
 	{
@@ -380,14 +383,22 @@ void GlutWindow::exit ( const char * fmt, ... )
 		return;
 	}
 		
-	char	text [1024];
+	char	text [10240];
 	va_list	ap;
 
-	va_start ( ap, fmt );	
-	vsprintf ( text, fmt, ap );	
-	va_end   ( ap );
-	printf   ( text );
-	::exit   ( 1 );
+	va_start  ( ap, fmt );	
+	vsnprintf ( text, sizeof ( text ) - 1, fmt, ap );	// ret == sizeof(text), buffer is too small, m.b. realloc and retry
+	va_end    ( ap );
+	printf    ( text );
+	::exit    ( 1 );
+}
+
+void	GlutWindow:: exit ( MakeStr& str )
+{
+	std::string	s = str;
+	
+	printf ( "%s\n", s.c_str () );		// Note: std::cout << str.str;
+	::exit ( 1 );							// exit as requested
 }
 
 void	GlutWindow:: errorCallback ( GLenum source, GLenum type, GLuint id, 

@@ -145,7 +145,14 @@ bool	FrameBuffer :: bindFace ( int face )
 {
 	glFramebufferTexture2D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, colorBuffer [0] -> getId (), 0 );
 
-	return bind ();
+	GLuint	currentFb;
+
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint *)&currentFb);
+
+	if (currentFb != frameBuffer)
+		return bind ();
+
+	return true;
 }
 
 bool	FrameBuffer :: unbind ( bool genMipmaps, GLenum target )
@@ -169,7 +176,7 @@ bool	FrameBuffer :: attachColorTexture ( Texture * tex, int no )
 	if ( frameBuffer == 0 )
 		return false;
 
-	if ( tex -> getTarget () != GL_TEXTURE_2D && tex -> getTarget () != GL_TEXTURE_RECTANGLE )
+	if ( tex -> getTarget () != GL_TEXTURE_2D && tex -> getTarget () != GL_TEXTURE_CUBE_MAP )
 		return false;
 
 	colorBuffer [no] = tex;

@@ -11,7 +11,10 @@ from PIL import Image
 def  _loadImage2D ( target, image ):
     if image.mode == 'L':			# handle paletted images
         image = image.convert ( mode = 'RGB' )
-			
+    elif image.mode == 'P':	
+        image = image.convert ( mode = 'RGB' )
+
+    #print ( image.mode, image.width, image.height )
     img_data = numpy.array(list(image.getdata()), numpy.uint8)
     glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 )	# set 1-byte alignment
 

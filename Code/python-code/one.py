@@ -11,7 +11,7 @@ vertices = [
 
 class   MyWindow ( Window.Window ):
     def __init__ ( self, w, h, t ):
-        super().__init__ ( w, h, t, fullScreen = True )
+        super().__init__ ( w, h, t, fullScreen = False )
 
         self.vao = glGenVertexArrays(1)
         self.vbo = glGenBuffers(1)
@@ -29,7 +29,7 @@ class   MyWindow ( Window.Window ):
         glClearColor ( 0.2, 0.3, 0.2, 1.0 )
         glClear      ( GL_COLOR_BUFFER_BIT + GL_DEPTH_BUFFER_BIT )
         glEnable     ( GL_DEPTH_TEST )
-        glDrawArrays ( GL_TRIANGLES, 0, 6 )
+        glDrawArrays ( GL_TRIANGLES, 0, 3 )
 
 def main():
     win = MyWindow ( 900, 900, "Render triangle" )

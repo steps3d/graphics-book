@@ -33,9 +33,11 @@ Program :: ~Program ()
 	destroy ();
 }
 
-bool	Program :: loadProgram ( const std::string& fileName )
+bool	Program :: loadProgram ( const std::string& file )
 {
-	Data data ( fileName );
+	Data data ( file );
+	
+	fileName = file;
 	
 	if ( !data.isOk () || data.getLength () < 1 )
 	{
@@ -57,22 +59,23 @@ bool	Program :: loadProgram ( Data * data )
 	{
 		const char * name;
 		GLenum		 type;
-		int			 start, end;
+		//int			 start, end;
+		std::string	 body;
 	};
 	
 	Chunk	info [] = 
 	{
-		{ "vertex",      GL_VERTEX_SHADER,          0, 0 },
-		{ "fragment",    GL_FRAGMENT_SHADER,        0, 0 },
-		{ "geometry",    GL_GEOMETRY_SHADER,        0, 0 },
-		{ "tesscontrol", GL_TESS_CONTROL_SHADER,    0, 0 },
-		{ "tesseval",    GL_TESS_EVALUATION_SHADER, 0, 0 },
-		{ "compute",     GL_COMPUTE_SHADER,         0, 0 }
+		{ "vertex",      GL_VERTEX_SHADER          },
+		{ "fragment",    GL_FRAGMENT_SHADER        },
+		{ "geometry",    GL_GEOMETRY_SHADER        },
+		{ "tesscontrol", GL_TESS_CONTROL_SHADER    },
+		{ "tesseval",    GL_TESS_EVALUATION_SHADER },
+		{ "compute",     GL_COMPUTE_SHADER         }
 	};
 	
-	std::string	s;
-	int		start = 0, end = 0;
-	int		type = -1;
+	std::string	s, body;
+	int			start = 0, end = 0;
+	int			type = -1;
 	
 	log += "Started loading composite shader from ";
 	log += data -> getFileName ();
@@ -80,10 +83,28 @@ bool	Program :: loadProgram ( Data * data )
 
 	while ( data -> getString ( s, '\n' ) )
 	{
-													// not a start of a new shader
-		if ( s.empty () || s.length () < 2 || s [0] != '-' || s [1] != '-' )
+													// handle #include
+		if ( stringTrim  ( s ).substr ( 0, 8 ) == "#include" )
 		{
-			end = data -> getPos ();
+			std::string	file = stringDequote ( stringTrim ( stringTrim  ( s ).substr ( 8 ) ) );
+			Data		d ( file );
+
+			if ( !d.isOk () )
+			{
+				log += "Cannot open file \"" + file + "\"";
+				
+				return false;
+			}
+
+			body += (const char *) d.getPtr ();
+			
+			continue;
+		}											// not a start of a new shader
+		else if ( s.empty () || s.length () < 2 || s [0] != '-' || s [1] != '-' )
+		{
+			end   = data -> getPos ();
+			body += s;
+			body += '\n';
 
 			continue;
 		}
@@ -92,37 +113,41 @@ bool	Program :: loadProgram ( Data * data )
 		
 		if ( start < end && type != -1 )			// there is shader
 		{
-			info [type].start = start;
-			info [type].end   = end;
+			//info [type].start = start;
+			//info [type].end   = end;
+			info [type].body  = body;
 		}
 		
 		start = data -> getPos ();
+		body  = "";
 		end   = start;
 		type  = -1;
 		
 		for ( size_t i = 0; i < sizeof ( info ) / sizeof ( info [0] ); i++ )
 			if ( s == info [i].name )
 			{
-				type = i;
+				type = (int)i;
 				break;
 			}
 	}
 	
 	if ( start < end && type != -1 )				// process last shader
 	{
-		info [type].start = start;
-		info [type].end   = end;
+		//info [type].start = start;
+		//info [type].end   = end;
+		info [type].body  = body;
 		start             = data -> getPos ();
 		end               = start;
 	}
 	
 						// now load all chunks
 	for ( size_t i = 0; i < sizeof ( info ) / sizeof ( info [0] ); i++ )
-		if ( info [i].start < info [i].end )
+		if ( !info [i].body.empty () )	//info [i].start < info [i].end )
 		{
-			Data	d ( data -> getPtr ( info [i].start ), info [i].end - info [i].start );
+			//Data	d    ( data -> getPtr ( info [i].start ), info [i].end - info [i].start );
+			Data	data ( (void *)info [i].body.c_str (), info [i].body.length () + 1 );		// XXX - m.b. strdup ?
 		
-			if ( !loadShaderOfType ( &d, info [i].type ) )
+			if ( !loadShaderOfType ( &data, info [i].type ) )
 				return false;
 		}
 	
@@ -149,7 +174,7 @@ bool    Program :: loadShader ( GLuint shader, Data * data )
 	glCompileShader ( shader );
 
               // check for OpenGL errors
-	if ( glGetError () != GL_NO_ERROR)
+	if ( glGetError () != GL_NO_ERROR )
 		return false;
 
 	glGetShaderiv ( shader, GL_COMPILE_STATUS, &compileStatus );
@@ -160,9 +185,11 @@ bool    Program :: loadShader ( GLuint shader, Data * data )
 }
 
 						// create and load shader of specific type
-bool	Program :: loadShaderOfType ( const char * fileName, GLenum type )
+bool	Program :: loadShaderOfType ( const char * file, GLenum type )
 {
-	Data * data = new Data ( fileName );
+	Data * data = new Data ( file );
+	
+	fileName = file;
 	
 	if ( !data -> isOk () || data -> getLength () < 1 )
 	{
@@ -350,10 +377,12 @@ bool	Program :: loadSeparate ( GLenum type, Data * data )
 	return program != 0;
 }
 
-bool	Program :: loadSeparate ( GLenum type, const std::string& fileName )
+bool	Program :: loadSeparate ( GLenum type, const std::string& file )
 {
 	Data * data = new Data ( fileName );
 
+	fileName = file;
+	
 	if ( data == nullptr )
 	{
 		log += "Cannot open \"";
@@ -756,7 +785,7 @@ bool    Program :: setUniformMatrix  ( const char * name, const glm::mat4& value
 	if ( loc < 0 )
 		return false;
 
-	glUniformMatrix4fv ( loc, 1, GL_FALSE/*GL_TRUE*/, glm::value_ptr(value) );		// require matrix transpose
+	glUniformMatrix4fv ( loc, 1, GL_FALSE/*GL_TRUE*/, glm::value_ptr(value) );
 
 	return true;
 }
@@ -770,7 +799,7 @@ bool    Program :: setUniformMatrices  ( const char * name, const glm::mat4 * va
 	if ( loc < 0 )
 		return false;
 
-	glUniformMatrix4fv ( loc, n, GL_FALSE/*GL_TRUE*/, (const GLfloat *) value );		// require matrix transpose
+	glUniformMatrix4fv ( loc, n, GL_FALSE /*GL_TRUE*/, (const GLfloat *) value );
 
 	return true;
 }

@@ -44,6 +44,7 @@ class	BasicMaterial
 	std::string	specMap;
 	std::string	bumpMap;
 	Texture	    tex;
+	glm::vec4	diffColor;
 
 public:
 	BasicMaterial  () = default;
@@ -74,6 +75,11 @@ public:
 		specMap = n;
 	}
 
+	const std::string&	getSpecMap () const
+	{
+		return specMap;
+	}
+	
 	void setBumpMap ( const std::string& n )
 	{
 		bumpMap = n;
@@ -82,6 +88,16 @@ public:
 	const std::string& getBumpMap () const
 	{
 		return bumpMap;
+	}
+	
+	void	setDiffColor ( const glm::vec4& c )
+	{
+		diffColor = c;
+	}
+	
+	const glm::vec4&	getDiffColor () const
+	{
+		return diffColor;
 	}
 	
 	bool load ()
@@ -162,6 +178,86 @@ struct MultiMesh
 	bbox						box;
 };
 
+class	MeshNode
+{
+	std::string				name;
+	glm::mat4 				transform;
+	MeshNode			  * parent = nullptr;
+	std::vector<MeshNode *>	children;
+	BasicMesh             * mesh   = nullptr;
+	
+public:
+	MeshNode ( const std::string& nodeName ) : name ( nodeName ) {}
+	~MeshNode ()
+	{
+		
+	}
+	
+	const std::string&	getName () const
+	{
+		return name;
+	}
+	
+	const glm::mat4&	getTransform () const
+	{
+		return transform;
+	}
+	
+	void	setTransform ( const glm::mat4& m )
+	{
+		transform = m;
+	}
+	
+	void	addChild ( MeshNode * node )
+	{
+		children.push_back ( node );
+		node->parent = this;
+	}
+
+	const std::vector<MeshNode *>& getChildren () const
+	{
+		return children;
+	}
+	
+	void	setParent ( MeshNode * p )
+	{
+		parent = p;
+	}
+	
+	MeshNode * getParent ()
+	{
+		return parent;
+	}
+	
+	const MeshNode * getParent () const
+	{
+		return parent;
+	}
+	
+	void	render ( const glm::mat4& mv ) const
+	{
+		glm::mat4	mt = mv * transform;
+		
+		//setUniformMat ( mt );		XXX
+		// set material
+		
+		if ( mesh )
+			mesh -> render ();
+		
+		for ( auto it : children )
+			it->render ( mt ); 
+	}
+	
+};
+
+class	CompositeMesh
+{
+	std::vector<MeshNode      *>	nodes;
+	std::vector<BasicMesh     *>	meshes;
+	std::vector<BasicMaterial *>	matInfos;
+	
+public:
+};
 
 extern const float pi;
 

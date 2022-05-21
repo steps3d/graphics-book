@@ -25,6 +25,7 @@ class	Data
 public:
 	explicit Data ( const std::string& fileName );
 	Data ( void * ptr, int len );
+	~Data ();
 
 	bool	isOk () const;
 
@@ -161,9 +162,20 @@ public:
 		return pos;
 	}
 
-	int	getBytes   ( void * ptr, int len );
-	bool	getString  ( std::string& str, char term );				// get a string with given terminator
+	std::string	getString ()
+	{
+		std::string	str;
+		
+		if ( !getString ( str ) )
+			return "";
+		
+		return str;
+	}
+	
+	int		getBytes   ( void * ptr, int len );
+	bool	getString  ( std::string& str, char term = '\0' );		// get a string with given terminator
 	bool	saveToFile ( const char * name ) const;
+	void	dump       ( int num, int offs = 0 ) const;
 };
 
 #endif

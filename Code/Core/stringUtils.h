@@ -12,6 +12,7 @@ std::string	stringTrim    ( const std::string& s );
 std::string	stringLower   ( const std::string& s );
 std::string	stringUpper   ( const std::string& s );
 std::string	stringDequote ( const std::string& str );
+bool		stringStarts  ( const std::string& str, const std::string& s );
 void	        stringParse   ( const std::string& str, std::string& cmd, std::string& args );
 std::string	replaceTabs   ( const std::string& str );
 bool            fileExist     ( const std::string& fileName );

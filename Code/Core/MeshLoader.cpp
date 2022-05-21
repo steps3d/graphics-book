@@ -1,4 +1,8 @@
 #include "BasicMesh.h"
+#include "AssimpConverter.h"
+//#include <assimp/pbrmaterial.h>
+
+/*
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
@@ -7,9 +11,11 @@
 #include <assimp/scene.h>     
 #include <assimp/postprocess.h>
 #include <assimp/cimport.h>
+#include <assimp/DefaultLogger.hpp>
+*/
 
 #ifdef _WIN32
-#pragma comment(lib, "assimp.lib") 
+//#pragma comment(lib, "assimp.lib") 
 #endif
 
 static void loadAiMesh ( const aiMesh * mesh, float scale, std::vector<BasicVertex>& vertices, std::vector<int>& indices, int base = 0 )
@@ -60,7 +66,11 @@ static BasicMesh * loadMeshFromMesh ( const aiMesh * mesh, float scale )
 	
 	loadAiMesh ( mesh, scale, vertices, indices );
 	
-	return new BasicMesh ( vertices.data (), indices.data (), vertices.size (), indices.size () / 3 /*mesh->mNumFaces*/ );
+	auto * myMesh = new BasicMesh ( vertices.data (), indices.data (), vertices.size (), indices.size () / 3 /*mesh->mNumFaces*/ );
+
+	myMesh->setName ( mesh->mName.C_Str() );
+
+	return myMesh;
 }
 
 BasicMesh * loadMesh ( const char * fileName, float scale )
@@ -78,12 +88,30 @@ BasicMesh * loadMesh ( const char * fileName, float scale )
 bool loadMeshAndMaterials ( const char * fileName, std::vector<BasicMesh*>& meshes, std::vector<BasicMaterial *>& materials, float scale )
 {
 	Assimp::Importer importer;
-	const int        flags = aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals;
+	
+	importer.SetPropertyBool ( AI_CONFIG_IMPORT_FBX_READ_ANIMATIONS, true );
+	
+	Assimp::DefaultLogger::create( "assimp.log",  Assimp::Logger::VERBOSE, aiDefaultLogStream_FILE);
+
+	// aiProcess_PreTransformVertices causes animations to be dropped !!!
+	// aiProcess_FlipWindingOrder - OK
+	// aiProcess_Triangulate  - OK
+	// aiProcess_PreTransformVertices - SKIP ANIMATIONS
+	// aiProcess_CalcTangentSpace - OK
+	// aiProcess_GenSmoothNormals - OK
+	//const int        flags = aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcessPreset_TargetRealtime_MaxQuality;
+	const int        flags = aiProcess_FlipWindingOrder | aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_ValidateDataStructure / aiProcess_JoinIdenticalVertices;// | aiProcessPreset_TargetRealtime_MaxQuality;
+
+	//printf ( "Validate %d\n", importer.ValidateFlags ( flags ) );
 	const aiScene  * scene = importer.ReadFile ( fileName, flags );
 	std::string		 path ( fileName );
 	auto			 p1     = path.rfind ( '/' );
 	auto			 p2     = path.rfind ( '\\' );
 
+	if (scene == nullptr)
+		return false;
+
+	printf ( "mNumAnimations = %d\n", scene->mNumAnimations);
 	if ( p1 == std::string::npos )
 		p1 = p2;
 	else
@@ -146,9 +174,19 @@ bool loadMeshAndMaterials ( const char * fileName, std::vector<BasicMesh*>& mesh
 
 		materials.push_back ( mat );
 	}
+	auto * root = scene->mRootNode;
+
+		// root->mNumChildren, root->mChildren keep hierarchy organization of model
+		// we link with meshes through names (mName)
+		// root->mName.C_Str ()
+		// root->mTransform - aiMatrix4x4
+		// root->mParent
+		// root->mChildren[], root->mNumChildren
 
 	for ( int i = 0; i < scene->mNumMeshes; i++ )
 	{
+		if ( scene->mMeshes [i]->mNormals == nullptr )		// sometimes happen
+			continue;
 		auto        matIndex = scene->mMeshes[i]->mMaterialIndex;
 		BasicMesh * mesh     = loadMeshFromMesh ( scene -> mMeshes [i], scale );
 		
@@ -156,7 +194,7 @@ bool loadMeshAndMaterials ( const char * fileName, std::vector<BasicMesh*>& mesh
 		meshes.push_back ( mesh );
 	}
 
-	delete scene;
+	//delete scene;
 
 	return true;
 }
@@ -230,6 +268,9 @@ bool loadAllMeshes ( const char * fileName, MultiMesh& mesh, std::vector<BasicMa
 				mat->setBumpMap ( path + name.C_Str () );
 			}
 
+		//material->GetTexture("$mat.gltf.pbrMetallicRoughness.baseColorFactor", 0, &name, NULL, NULL, NULL, NULL, NULL);
+		//printf ( "PBR: %s\n", name.C_Str() );
+		
 		materials.push_back ( mat );
 	}
 
@@ -265,7 +306,7 @@ bool loadAllMeshes ( const char * fileName, MultiMesh& mesh, std::vector<BasicMa
 	for ( auto& v : mesh.vertices )
 		mesh.box.addVertex ( v.pos );
 
-	delete scene;
+	//delete scene;
 	
 	return true;
 }

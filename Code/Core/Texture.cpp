@@ -312,11 +312,12 @@ bool	Texture :: createArray2D ( int theWidth, int theHeight, int numSlices, GLen
 	return true;
 }
 
-bool	Texture :: loadRect ( const std::string& fileName )
+bool	Texture :: loadRect ( const std::string& file )
 {
-	target = GL_TEXTURE_RECTANGLE;
-	depth  = 1;
-	id     = SOIL_load_OGL_texture ( fileName.c_str (), 
+	target    = GL_TEXTURE_RECTANGLE;
+	depth    = 1;
+	fileName = file;
+	id       = SOIL_load_OGL_texture ( fileName.c_str (), 
 					SOIL_LOAD_AUTO,
 					SOIL_CREATE_NEW_ID,
 					SOIL_FLAG_TEXTURE_RECTANGLE | SOIL_FLAG_DDS_LOAD_DIRECT );
@@ -336,14 +337,15 @@ bool	Texture :: loadRect ( const std::string& fileName )
 }
 
 
-bool	Texture :: load2D ( const std::string& fileName )
+bool	Texture :: load2D ( const std::string& file )
 {
-	target = GL_TEXTURE_2D;
-	depth  = 1;
-	id     = SOIL_load_OGL_texture ( fileName.c_str (), 
+	target   = GL_TEXTURE_2D;
+	depth    = 1;
+	fileName = file;
+	id       = SOIL_load_OGL_texture ( fileName.c_str (), 
 					SOIL_LOAD_AUTO,
 					SOIL_CREATE_NEW_ID,
-					SOIL_FLAG_POWER_OF_TWO | SOIL_FLAG_MIPMAPS | SOIL_FLAG_DDS_LOAD_DIRECT );
+					SOIL_FLAG_POWER_OF_TWO | /*SOIL_FLAG_MIPMAPS | */ SOIL_FLAG_DDS_LOAD_DIRECT );
 	
 	if ( id <= 0 )
 		return false;
@@ -373,11 +375,76 @@ bool	Texture :: load2D ( const std::string& fileName )
 	return true;
 }
 
-bool	Texture :: load2DHdr ( const std::string& fileName )
+bool	Texture :: load2D ( const void * ptr, size_t len, const std::string& file )
+{
+	target   = GL_TEXTURE_2D;
+	depth    = 1;
+	fileName = file;
+	id       = SOIL_load_OGL_texture_from_memory ( (const unsigned char *const)ptr, len, 0, 0, SOIL_FLAG_DDS_LOAD_DIRECT );
+
+	if ( id <= 0 )
+		return false;
+
+	glTexParameteri ( target, GL_TEXTURE_WRAP_S, GL_REPEAT );    // set default params for texture
+	glTexParameteri ( target, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	
+	if ( autoMipmaps )
+		glGenerateMipmap ( target );
+	
+	if ( autoMipmaps )
+	{
+		glTexParameteri ( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glTexParameteri ( target, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	}
+	else
+	{
+		glTexParameteri ( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameteri ( target, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	}
+	
+	glGetTexLevelParameteriv ( target, 0, GL_TEXTURE_WIDTH,  &width );
+	glGetTexLevelParameteriv ( target, 0, GL_TEXTURE_HEIGHT, &height );
+	
+	glBindTexture  ( target, 0 );
+
+	return true;
+}
+
+bool	Texture :: loadCubemap ( const void * ptr, size_t len )
+{
+	target   = GL_TEXTURE_CUBE_MAP;
+	//fileName = file;
+	id       = SOIL_load_OGL_single_cubemap_from_memory ( (const unsigned char *const)ptr, len, "NSWEUD", 0, 0, SOIL_FLAG_DDS_LOAD_DIRECT );
+
+	if ( id <= 0 )
+		return false;
+
+	glBindTexture   ( target, id );
+	glTexParameterf ( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	glTexParameterf ( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+	glTexParameteri ( target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE );
+
+	if ( autoMipmaps )
+		glGenerateMipmap ( target );
+	
+	setDefaultFilter ();
+	
+	glGetTexLevelParameteriv ( GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_TEXTURE_WIDTH, &width );
+	glBindTexture            ( target, 0 );
+
+	height = width;
+	depth  = 1;
+	
+	return true;
+}
+
+bool	Texture :: load2DHdr ( const std::string& file )
 {
 //    stbi_set_flip_vertically_on_load ( true );
+	fileName = file;
+	
 	int 	numComponents;
-	float * data = stbi_loadf( fileName.c_str (), &width, &height, &numComponents, 0 );
+	float * data = stbi_loadf ( fileName.c_str (), &width, &height, &numComponents, 0 );
 	
 	if ( data == nullptr )
 	{
@@ -502,8 +569,10 @@ ok:;
 	return true;
 }
 
-bool	Texture :: loadCubemapHdr ( const std::string& fileName )
+bool	Texture :: loadCubemapHdr ( const std::string& file )
 {
+	fileName = file;
+	
 			// check for floating-point DDS 
 	Data	     data ( fileName );
 	
@@ -576,10 +645,11 @@ bool	Texture :: loadCubemapHdr ( const std::string& fileName )
 	return true;
 }
 
-bool	Texture :: load3D ( const std::string& fileName )
+bool	Texture :: load3D ( const std::string& file )
 {
-	target = GL_TEXTURE_3D;
-	id     = SOIL_load_OGL_texture ( fileName.c_str (), 
+	target   = GL_TEXTURE_3D;
+	fileName = file;
+	id       = SOIL_load_OGL_texture ( fileName.c_str (), 
 					SOIL_LOAD_AUTO,
 					SOIL_CREATE_NEW_ID,
 					SOIL_FLAG_POWER_OF_TWO | SOIL_FLAG_MIPMAPS | SOIL_FLAG_DDS_LOAD_DIRECT );
@@ -614,21 +684,22 @@ bool	Texture :: load3D ( const std::string& fileName )
 	return true;
 }
 
-bool	Texture :: loadCubemap ( const std::string& fileName )
+bool	Texture :: loadCubemap ( const std::string& file )
 {
-	target = GL_TEXTURE_CUBE_MAP;
-	id     = SOIL_load_OGL_single_cubemap(
-			fileName.c_str (),
-			SOIL_DDS_CUBEMAP_FACE_ORDER,
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_POWER_OF_TWO
-			| SOIL_FLAG_MIPMAPS
-			//| SOIL_FLAG_COMPRESS_TO_DXT
-			//| SOIL_FLAG_TEXTURE_REPEATS
-			//| SOIL_FLAG_INVERT_Y
-			| SOIL_FLAG_DDS_LOAD_DIRECT
-			);
+	target   = GL_TEXTURE_CUBE_MAP;
+	fileName = file;
+	id       = SOIL_load_OGL_single_cubemap (
+					fileName.c_str (),
+					SOIL_DDS_CUBEMAP_FACE_ORDER,
+					SOIL_LOAD_AUTO,
+					SOIL_CREATE_NEW_ID,
+					SOIL_FLAG_POWER_OF_TWO
+					| SOIL_FLAG_MIPMAPS
+					//| SOIL_FLAG_COMPRESS_TO_DXT
+					//| SOIL_FLAG_TEXTURE_REPEATS
+					//| SOIL_FLAG_INVERT_Y
+					| SOIL_FLAG_DDS_LOAD_DIRECT
+			   );
 
 	if ( id <= 0 )
 		return false;
@@ -659,6 +730,8 @@ bool	Texture :: loadCubemap ( const std::string& fileName )
 
 bool	Texture :: loadCubemapFromNames ( const char * fileNames )
 {
+	fileName = fileNames;
+	
 	const char * seps = ",;";
 	Tokenizer	 tok ( fileNames, seps );
 	std::string	 names [6];
@@ -677,8 +750,9 @@ bool	Texture :: loadCubemapFromNames ( const char * fileNames )
 
 bool	Texture :: loadCubemap ( const char * f1, const char * f2, const char * f3, const char * f4, const char * f5, const char * f6 )
 {
-	target = GL_TEXTURE_CUBE_MAP;
-	id     = SOIL_load_OGL_cubemap ( f1, f2, f3, f4, f5, f6, SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS );
+	fileName = std::string( f1 ) + "; " + f2 + "; " + f3 + "; " + f4 + "; " + f5 + "; " + f6;
+	target   = GL_TEXTURE_CUBE_MAP;
+	id       = SOIL_load_OGL_cubemap ( f1, f2, f3, f4, f5, f6, SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS );
 
 	if ( id <= 0 )
 		return false;

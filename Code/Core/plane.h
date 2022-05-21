@@ -27,11 +27,11 @@ enum
 class   plane
 {
 public:
-    glm::vec3 	n;          		// normal vector
-    float   	dist = 0;       		// signed distance along n
-									// build plane from normal and signed distance
-    unsigned      	nearPointMask = 0;     //  if not initialized
-    unsigned      	mainAxis      = 0;          // index of main axis
+	glm::vec3 	n;          		// normal vector
+	float   	dist = 0;       	// signed distance along n
+						// build plane from normal and signed distance
+	unsigned      	nearPointMask = 0;	//  if not initialized
+	unsigned      	mainAxis      = 0;	// index of main axis
 
 	plane () : n ( 0, 0, 1 )
 	{
@@ -45,85 +45,82 @@ public:
 		n /= len;
 		//d /= len;
 
-	        computeNearPointMaskAndMainAxis ();
-    }
+		computeNearPointMaskAndMainAxis ();
+	}
                                 // build plane from plane equation
-    plane ( float nx, float ny, float nz, float d ) : n (nx, ny, nz), dist ( d )
-    {
+	plane ( float nx, float ny, float nz, float d ) : n (nx, ny, nz), dist ( d )
+	{
 		float	len = glm::length ( n );
 
-        	n /= len;
+		n /= len;
 		d /= len;
 
 		computeNearPointMaskAndMainAxis ();
-    }
+	}
                                 // build plane from normal and point on plane
-    plane ( const glm::vec3& normal, const glm::vec3& point ) : n ( normal )
-    {
-        n = glm::normalize ( n );
+	plane ( const glm::vec3& normal, const glm::vec3& point ) : n ( normal )
+	{
+		n    = glm::normalize ( n );
+		dist = - glm::dot( point, n );
 
-        dist = - glm::dot( point, n );
-
-        computeNearPointMaskAndMainAxis ();
-    }
+		computeNearPointMaskAndMainAxis ();
+	}
                                 // build plane from 3 points
-    plane ( const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3 )
-    {
-        n = glm::cross ( p2 - p1, p3 - p1 );
+	plane ( const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3 )
+	{
+		n = glm::cross ( p2 - p1, p3 - p1 );
+		n = glm::normalize ( n );
+		dist = -glm::dot ( p1, n );
 
-        n = glm::normalize ( n );
+		computeNearPointMaskAndMainAxis ();
+	}
 
-        dist = -glm::dot ( p1, n );
+	plane ( const plane& plane ) : n ( plane.n ), dist ( plane.dist )
+	{
+		nearPointMask = plane.nearPointMask;
+		mainAxis      = plane.mainAxis;
+	}
 
-        computeNearPointMaskAndMainAxis ();
-    }
+	void     setFromEquation ( float a, float b, float c, float d )
+	{
+		n    = glm::vec3 ( a, b, b );
+		dist =  -d;
 
-    plane ( const plane& plane ) : n ( plane.n ), dist ( plane.dist )
-    {
-        nearPointMask = plane.nearPointMask;
-        mainAxis      = plane.mainAxis;
-    }
+		float	len = glm::length ( n );
 
-    void     setFromEquation ( float a, float b, float c, float d )
-    {
-        n    = glm::vec3 ( a, b, b );
-        dist =  -d;
+		n  /= len;
+		dist /= len;
 
-	float	len = glm::length ( n );
-
-	n    /= len;
-	dist /= len;
-
-        computeNearPointMaskAndMainAxis ();
-    }
+		computeNearPointMaskAndMainAxis ();
+	}
 	
-    float    signedDistanceTo ( const glm::vec3& v ) const
-    {
-        return glm::dot ( v, n ) + dist;
-    }
+	float    signedDistanceTo ( const glm::vec3& v ) const
+	{
+		return glm::dot ( v, n ) + dist;
+	}
 
 	float	distanceTo ( const glm::vec3& v ) const
 	{
 		return fabs ( signedDistanceTo ( v ) );
 	}
 	                            // get point on plane
-    glm::vec3    point () const
-    {
-        return (-dist) * n;
-    }
+	glm::vec3    point () const
+	{
+		return (-dist) * n;
+	}
                             // classify point
-    int	classify ( const glm::vec3& p ) const
-    {
-        float   v = signedDistanceTo ( p );
+	int	classify ( const glm::vec3& p ) const
+	{
+		float   v = signedDistanceTo ( p );
 
-        if ( v > EPS )
-            return IN_FRONT;
+		if ( v > EPS )
+			return IN_FRONT;
         
-        if ( v < -EPS )
-            return IN_BACK;
+		if ( v < -EPS )
+			return IN_BACK;
 
-        return IN_PLANE;
-    }
+		return IN_PLANE;
+	}
 
     void    flip ()
     {

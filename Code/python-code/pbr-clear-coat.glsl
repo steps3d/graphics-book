@@ -34,12 +34,11 @@ void main(void)
     l  = normalize (lightDir);
     v  = normalize (eye   - p.xyz);
     h  = normalize (l + v);
-/*    
+    
                 // convert to TBN
     v  = vec3 ( dot ( v, t ), dot ( v, b ), dot ( v, n ) );
     l  = vec3 ( dot ( l, t ), dot ( l, b ), dot ( l, n ) );
     h  = vec3 ( dot ( h, t ), dot ( h, b ), dot ( h, n ) );
-*/
 }
 
 -- fragment
@@ -59,14 +58,12 @@ const float gamma = 2.2;
 const float pi    = 3.1415926;
 const float FDiel = 0.04;        // Fresnel for dielectrics
 
-uniform float roughness;
-uniform float metallness;
+uniform float strength;
 
 float sqr ( in float x )
 {
-    return x*x;
+    return x * x;
 }
-
     // optimized x^5 without special functions
 float pow5 ( in float x )
 {
@@ -114,13 +111,6 @@ float D_GGX ( in float roughness, in float NdH )
     return m2 / (pi * d * d);
 }
 
-    // here we may use (roughness, anisotropy)
-    // sigma = vec2 ( roughness * (1 + anisotropy), roughness * (1 - anisotropy) )
-float D_GGX_Aniso ( in vec2 sigma, in float nh, in float th, in float bh )
-{
-    return 1.0 / (pi * sigma.x * sigma.y * sqr ( sqr(nh) + sqr (th/sigma.x) + sqr (bh/sigma.y) ) );
-}
-
 float G_schlick ( in float roughness, in float nv, in float nl )
 {
     float k = roughness * roughness * 0.5;
@@ -144,8 +134,8 @@ float G_default ( in float nl, in float nh, in float nv, in float vh )
 {
     return min ( 1.0, min ( 2.0*nh*nv/vh, 2.0*nh*nl/vh ) );
 }
-
-vec3 cookTorrance ( in float nl, in float nv, in float nh, in float vh, in vec3 f0, in float roughness, in float th, in float bh )
+/*
+vec3 fr ( in float nl, in float nv, in float nh, in float vh, in vec3 f0, in float roughness )
 {
     if ( nl < 0.0 )
         return vec3 ( 0.0 );
@@ -154,34 +144,44 @@ vec3 cookTorrance ( in float nl, in float nv, in float nh, in float vh, in vec3 
 
 //    float D = D_blinn(roughness, nh );
 //    float D = D_beckmann(roughness, nh );
-//    float D = D_GGX     ( roughness, nh );
-
-    float D = D_GGX_Aniso ( vec2 ( 0.25, 0.025 ), nh, th, bh );
+    float D = D_GGX     ( roughness, nh );
 
 //    float G = G_schlick ( roughness, nv, nl );    // XXX
     float G = G_neumann ( nl, nv );
 //    float G = G_klemen ( nl, nv, vh );
 //    float G = G_default ( nl, nh, nv, vh );
 
-    return f0 * D * G;
+    return f0 * D * G / (nl * nv);
 }
-
-float    burley ( in float r, in float nv, in float nl, in float lh )
+*/
+vec3 fc ( in vec3 c, in float strength, in float roughnessMat, in float roughnessCC, in float nl, in float nv, in float nh, in float lh, in float vh )
 {
-    float f90           = 0.5 + 2.0 * r * lh * lh;
-    float lightScatter = fresnel ( 1.0, f90, nl );
-    float viewScatter  = fresnel ( 1.0, f90, nv );
+    vec3    F0Mat = mix ( vec3(FDiel), c, 1 );
+    vec3    F0CC  = vec3(FDiel) * strength;
+    float    D     = D_GGX     ( roughnessMat, nh );
+    float    Dc    = D_GGX     ( roughnessCC,  nh );
+    float    G     = G_neumann ( nl, nv );
+    vec3     FMat  = fresnel   ( F0Mat, vh );
+    vec3     Fcc   = fresnel   ( F0CC,  vh );
+    float    V     = 1.0 / sqr ( lh );                // use simplified G
+    vec3    fd    = c / pi;
+    vec3    fr    = FMat * D * G / (nl * nv);
+    vec3    fc    = V * Dc * Fcc;
+    //vec3    c2    = vec3 ( 0, 0, 1 );
     
-    return lightScatter * viewScatter / pi;
+    //return c / pi * ( 1 - Fcc ) + fr * ( 1 - Fcc ) + fc;
+    //return c * ((fd + fr * (vec3(1.0) - Fcc))*(vec3(1.0) - Fcc) + fc);
+    
+    return fd * ( vec3 ( 1.0 ) - Fcc ) * fr * ( vec3 ( 1.0 ) - Fcc ) + fc;
 }
 
 void main ()
 {
-//    vec3    n          = vec3 ( 0, 0, 1 );        // unperturbed normal
+    vec3    n          = vec3 ( 0, 0, 1 );        // unperturbed normal
 //    vec3    base       = vec3 ( 1, 1, 0 );        // yellow
     vec3    base       = vec3 ( 1, 0.5, 0.24 );
 //    float    roughness  = 0.25;
-    float    metallness = 1.0;
+//    float    metallness = 0.0;
 
     base = pow ( base, vec3 ( gamma ) );
     
@@ -189,20 +189,13 @@ void main ()
     vec3  l2   = normalize ( l );
     vec3  h2   = normalize ( h );
     vec3  v2   = normalize ( v );
-    vec3  t2   = normalize ( t );
-    vec3  b2   = normalize ( b );
     float nv   = max ( 0.0, dot ( n2, v2 ));
     float nl   = max ( 0.0, dot ( n2, l2 ));
+    float nh   = max ( 0.0, dot ( n2, h2 ));
     float hl   = max ( 0.0, dot ( h2, l2 ));
     float vh   = max ( 0.0, dot ( h2, v2 ));
-    float nh   = dot ( n2, h2 );
-    float th   = dot ( h2, t2 );
-    float bh   = dot ( h2, b2 );
-    
-    vec3 F0          = mix ( vec3(FDiel), base, metallness );
-    vec3 specFresnel = fresnel ( F0, vh );    //nv );    // hv
-    vec3 spec        = cookTorrance ( nl, nv, nh, vh, specFresnel, roughness, th, bh ) / max ( 0.001, 4.0 * nv );
-    vec3 diff        = (vec3(1.0) - specFresnel) * nl / pi;
+    vec3  c    = fc ( base, strength, 0.125, 0.7, nl, nv, nh, hl, vh) * nl;
 
-    color = pow ( vec4 ( ( diff * mix ( base, vec3(0.0), metallness) + spec ), 1.0 ), vec4 ( 1.0 / gamma ) );
+    color = pow ( vec4 ( c, 1.0 ), vec4 ( 1.0 / gamma ) );
+    //color = vec4(c,1);
 }

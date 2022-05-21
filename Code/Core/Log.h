@@ -8,6 +8,7 @@
 #include	<string>
 #include	<stdlib.h>
 #include	<stdio.h>
+#include	<sstream>
 
 #define GLM_FORCE_RADIANS
 #define GLM_SWIZZLE
@@ -19,97 +20,84 @@
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
 
-#ifndef	_CVTBUFSIZE
-	#define	_CVTBUFSIZE	80
-#endif
-
-//using namespace std;
 
 class	Log
 {
-	std::string	str;
-	std::string	logName;
+	std::string			logName;
+	std::stringstream	s;
+	bool				fatal = false;
 
 public:
-	Log  ( const char * logFileName );
-	~Log ();
+	Log  ( const std::string& logFileName ) : logName ( logFileName ) {}
+	~Log () {}
 
-	Log& append ( const char * s )
+	Log&	setLogName ( const std::string& logFileName )
 	{
-		str += s;
+		logName = logFileName;
+		
 
 		return *this;
 	}
-
-	Log& append ( const std::string& s )
-	{
-		str += s;
-
-		return *this;
-	}
-
+	
 	Log& flush ();
 
-	class	endl
+	struct endl__ {};
+	class fatal__ {};
+	
+	static endl__ 	endl;
+	static Log		appLog;
+	
+	template <typename T>
+	Log& operator << ( T value )
 	{
-	};
+		s << value;
+
+		return *this;
+	}
+
+	
+	Log& operator << ( endl__ )
+	{
+		flush ();
+		
+		if ( fatal )
+			::exit ( 1 );
+		
+		return *this;
+	}
+	
+	Log& operator << ( fatal__ )
+	{
+		fatal = true;
+		
+		return *this;
+	}
 
 };
 
-inline	Log& operator << ( Log& log, Log::endl )
-{
-	return log.flush ();
+Log& log ( int level = 0 );
+Log& fatal ();
+
+/*
+inline std::ostream& operator << ( std::ostream& stream, const glm::vec2& v )
+{ 
+	stream << "vec2(" << v.x << ", " << v.y << ")";
+
+	return stream;
 }
 
-inline	Log& operator << ( Log& log, const char * str )
-{
-	return log.append ( str );
+inline std::ostream& operator << ( std::ostream& stream, const glm::vec3& v )
+{ 
+	stream << "vec2(" << v.x << ", " << v.y << ", " << v.z << ")";
+
+	return stream;
 }
 
-inline	Log& operator << ( Log& log, const std::string& str )
-{
-	return log.append ( str );
+inline std::ostream& operator << ( std::ostream& stream, const glm::vec4& v )
+{ 
+	stream << "vec2(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
+
+	return stream;
 }
 
-inline	Log& operator << ( Log& log, int n )
-{
-	char	buf [32];
-
-#ifdef	_WIN32
-	itoa ( n, buf, 10 );
-#else
-	sprintf ( buf, "%d", n );
-#endif
-
-	return log.append ( buf );
-}
-
-
-inline Log& operator << ( Log& log, float f )
-{
-	char	buf [_CVTBUFSIZE];
-
-	return log.append ( gcvt ( f, 12, buf ) );
-}
-
-inline Log& operator << ( Log& log, double f )
-{
-	char	buf [_CVTBUFSIZE];
-
-	return log.append ( gcvt ( f, 12, buf ) );
-}
-
-inline Log& operator << ( Log& log, const glm::vec2& v )
-{
-	return log << "( " << v.x << ", " << v.y << ") ";
-}
-
-inline Log& operator << ( Log& log, const glm::vec3& v )
-{
-	return log << "( " << v.x << ", " << v.y << ", " << v.z << ") ";
-}
-
-inline Log& operator << ( Log& log, const glm::vec4& v )
-{
-	return log << "( " << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ") ";
-}
+*/

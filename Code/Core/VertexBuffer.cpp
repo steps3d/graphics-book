@@ -32,7 +32,7 @@ bool	VertexBuffer :: create ()
 {
 	glGenBuffersARB ( 1, &id );
 	
-	return ok = (glIsBuffer ( id ) == GL_TRUE);
+	return ok = (id > 0);
 }
 
 void	VertexBuffer :: bind ( GLenum theTarget )

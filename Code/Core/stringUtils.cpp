@@ -6,15 +6,23 @@
 #include	<cctype>				// for tolower/toupper
 #include	"stringUtils.h"
 
+bool		stringStarts  ( const std::string& str, const std::string& s )
+{
+	if ( str.length () < s.length () )
+		return false;
+
+	return str.substr ( 0, s.length () ) == s;
+}
 std::string	stringTrim ( const std::string& str )
 {
-	int	len = str.length ();
+	int	len = (int)str.length ();
 	int	i, j;
 
-	for ( i = 0; i < len && isspace ( str [i] ); i++ )
+				// add > 0 for correctly skipping cyrillic
+	for ( i = 0; i < len && str [i] > 0 && isspace ( str [i] ); i++ )
 		;
 
-	for ( j = len - 1; j >= 0 && isspace ( str [j] ); j-- )
+	for ( j = len - 1; j >= 0 && str [j] > 0 && isspace ( str [j] ); j-- )
 		;
 
 	return str.substr ( i, j - i + 1 );
@@ -22,10 +30,10 @@ std::string	stringTrim ( const std::string& str )
 
 std::string	replaceTabs ( const std::string& str )
 {
-	int		len = str.length ();
+	size_t		len = str.length ();
 	std::string	s   = str;
 
-	for ( int i = 0; i < len; i++ )
+	for ( size_t i = 0; i < len; i++ )
 		if ( s [i] == '\t' )
 			s [i] = ' ';
 
@@ -60,8 +68,8 @@ std::string	stringDequote ( const std::string& str )
 
 void	stringParse ( const std::string& str, std::string& cmd, std::string& args )
 {
-	int	len = str.length ();
-	int	pos;
+	size_t	len = str.length ();
+	size_t	pos;
 
 	for ( pos = 0; pos < len && str [pos] != ' ' && str [pos] != '\t'; pos++ )
 		;
@@ -95,7 +103,7 @@ std::string		buildFileName ( const std::string& path, const std::string& name )
 	if ( path.empty () )
 		return name;
 
-	int	pos = path.length () - 1;
+	size_t	pos = path.length () - 1;
 
 	std::string	res ( path );
 
@@ -117,7 +125,7 @@ std::string		buildFileName ( const std::string& path, const std::string& name )
 								// extract path from a filename
 std::string	getPath ( const std::string& fullName )
 {
-	for ( int i = fullName.length () - 1; i >= 0; i-- )
+	for ( int i = (int)fullName.length () - 1; i >= 0; i-- )
 	{
 		char	ch = fullName [i];
 
@@ -130,7 +138,7 @@ std::string	getPath ( const std::string& fullName )
 							// extract filename and extension
 std::string	getFileName ( const std::string& fullName )
 {
-	int	len = fullName.length ();
+	int	len = (int)fullName.length ();
 
 	for ( int i = len - 1; i >= 0; i-- )
 	{

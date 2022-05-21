@@ -83,6 +83,11 @@ Data :: Data ( const std::string& fileName )
 	close ( fd );
 }
 
+Data :: ~Data ()
+{
+	if ( !file.empty () )
+		free ( bits );
+}
 bool	Data :: isOk () const
 {
 	return bits != nullptr;
@@ -143,3 +148,13 @@ bool	Data :: saveToFile ( const char * name ) const
 	return true;
 
 }
+void	Data :: dump ( int num, int offs ) const
+{
+	uint8_t * ptr = offs + (uint8_t *) bits;
+
+	for ( int i = 0; i < num; i++ )
+		printf ( "%02x ", ptr [i] );
+
+	printf ( "\n" );
+}
+
