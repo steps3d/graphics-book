@@ -225,13 +225,14 @@ class RotationWindow (Window):
         m = glm.rotate ( m, glm.radians ( -self.rot.z ), glm.vec3 ( 0, 0, 1 ) )
         m = glm.rotate ( m, glm.radians (  self.rot.y ), glm.vec3 ( 0, 1, 0 ) )
         m = glm.rotate ( m, glm.radians (  self.rot.x ), glm.vec3 ( 1, 0, 0 ) )
-        return m
+        return glm.lookAt ( self.eye, glm.vec3 ( 0, 0, 0 ), glm.vec3 ( 0, 0, 1 ) ) * m
 
     def normalMatrix ( self, m ):
         return glm.inverseTranspose ( glm.mat3 ( m ) )
 
     def getProjection ( self, fovDegrees = 60.0, zNear = 0.1, zFar = 100.0 ):
-        return glm.perspective ( glm.radians ( fovDegrees ), self.getAspect (), zNear, zFar ) * glm.lookAt ( self.eye, glm.vec3 ( 0, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
+        #return glm.perspective ( glm.radians ( fovDegrees ), self.getAspect (), zNear, zFar ) * glm.lookAt ( self.eye, glm.vec3 ( 0, 0, 0 ), glm.vec3 ( 0, 0, 1 ) )
+        return glm.perspective ( glm.radians ( fovDegrees ), self.getAspect (), zNear, zFar )
 
     def mouseButton ( self, button, action, mods ):
         if button == glfw.MOUSE_BUTTON_LEFT and action == glfw.PRESS:

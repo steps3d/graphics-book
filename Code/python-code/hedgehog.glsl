@@ -89,13 +89,13 @@ void main ()
 
 			produceVertices ( v, n );
 			//produceVertices ( s, t );
-//			s += ds;
+			s += ds;
 		}
 
 		t -= dt;
 	}
 
-produceVertices ( v0 + 0.5*v01 + 0.5*v02, normalize ( n0 + 0.5*n01 + 0.5*n02 ) );
+//produceVertices ( v0 + 0.5*v01 + 0.5*v02, normalize ( n0 + 0.5*n01 + 0.5*n02 ) );
 
 }
 

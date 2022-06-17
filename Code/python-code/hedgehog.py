@@ -26,12 +26,12 @@ class   MyWindow ( Window.RotationWindow ):
         glEnable     ( GL_DEPTH_TEST )
 
         self.shader.use ()
-        self.shader.setUniformMat ( "mv", self.getRotation () * self.transf)
+        self.shader.setUniformMat ( "mv", self.getRotation () * self.transf )
         self.shader.setUniformMat ( "nm", self.normalMatrix ( self.getRotation () ) )
         self.mesh.render()
 
         self.fur.use ()
-        self.fur.setUniformMat ( "mv", self.getRotation () * self.transf)
+        self.fur.setUniformMat ( "mv", self.getRotation () * self.transf )
         self.fur.setUniformMat ( "nm", self.normalMatrix ( self.getRotation () ) )
         self.fur.setUniformMat ( "proj",  self.getProjection () )
         self.fur.setUniformInt ( "length", self.length )
@@ -49,11 +49,11 @@ class   MyWindow ( Window.RotationWindow ):
         self.shader.setUniformFloat ( "ka", self.ka )
 
     def key ( self, key, scancode, action, mods ):
-        #print ( key, action )
+        print ( key, action )
         super().key ( key, scancode, action, mods )
-        if key == 334 and action == 1:
+        if key == 61 and action == 1:
             self.length += 1
-        elif key == 333 and action == 1 and self.length > 0:
+        elif key == 45 and action == 1 and self.length > 0:
             self.length -= 1
   
 

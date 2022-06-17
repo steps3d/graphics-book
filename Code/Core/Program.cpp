@@ -901,7 +901,16 @@ bool	Program :: getUniformBlockVar ( int blockIndex, const char * varName, int& 
 
 void	Program :: bindBufferToIndex ( int uniformBlockIndex, int bindingIndex )
 {
+		// assign a binding point to an active uniform block
 	 glUniformBlockBinding ( program, (GLuint)uniformBlockIndex, (GLuint)bindingIndex );
+}
+
+void	Program :: bindBufferToIndex ( const char * uniformBlockName, int bindingIndex )
+{
+	GLuint	blockIndex = glGetProgramResourceIndex ( program, GL_UNIFORM_BLOCK, uniformBlockName );
+
+		// assign a binding point to an active uniform block
+	 glUniformBlockBinding ( program, blockIndex, (GLuint)bindingIndex );
 }
 
 glm::vec4    Program :: getUniformVector ( const char * name )

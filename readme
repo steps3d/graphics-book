@@ -12,4 +12,4 @@ Makefile.linux.
 For Window you need explicitly to specify path to those libraries in 
 nmake.inc or CMakeLists.txt files.
 
-
+For python code dependencies see readme file in Code/python-code.

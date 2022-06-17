@@ -202,6 +202,24 @@ public:
 
 		return 0;						// plane crosses this box
 	}
+	float	distanceTo ( const bbox& box ) const
+	{
+		float	distSqr = 0;
+
+		for ( int i = 0; i < 3; i++ )
+		{
+			float	d1 = maxPoint [i] - box.minPoint [i];
+			float	d2 = minPoint [i] - box.maxPoint [i];
+
+			if ( d1 > 0 )
+				distSqr += d1*d1;
+
+			if ( d2 > 0 )
+				distSqr += d2*d2;
+		}
+
+		return sqrtf ( distSqr );
+	}
 };
 
 #endif

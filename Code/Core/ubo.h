@@ -64,10 +64,12 @@ public:
 		glBindBufferBase ( GL_UNIFORM_BUFFER, binding = index, id );	
 	}
 	
+		// bind our binding point to uniform buffer in a program
+		// just sets buffer binding point in a program to our binding value
 	void	bindToProgram ( Program& program, const std::string& bufferName )
 	{
 		GLuint	blockIndex = glGetProgramResourceIndex ( program.getProgram (), GL_UNIFORM_BLOCK, bufferName.c_str () );
-		
+			// assign a binding point to an active uniform block
 		program.bindBufferToIndex ( blockIndex, binding );
 	}
 	

@@ -160,7 +160,9 @@ public:
 	int		uniformBlockBinding        ( int blockIndex ) const;
 	int		uniformBlockActiveUniforms ( int blockIndex ) const;
 	bool	getUniformBlockVar         ( int blockIndex, const char * varName, int& offs, int& size );
-	void	bindBufferToIndex          ( int uniformBlockIndex, int bindingIndex );
+		// assign a binding point to an active uniform block (by id or name)
+	void	bindBufferToIndex ( int uniformBlockIndex, int bindingIndex );
+	void	bindBufferToIndex ( const char * uniformBlockName, int bindingIndex );
 
 	int     indexForAttrName   ( const char * name );
 	bool	setAttrPtr         ( const char * name, int numComponents, GLsizei stride, void * ptr, 

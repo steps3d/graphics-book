@@ -57,13 +57,13 @@ class    Texture:
         pass
 
     @classmethod
-    def createEmpty ( cls, width, height, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, fmt = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
+    def createEmpty ( cls, width, height, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
         tex        = Texture ( filename = None, target = target, clamp = clamp, filter = filter )
         tex.width  = width
         tex.height = height
 
         tex.bind ()
-        glTexImage2D ( tex.target, 0, intFormat,  width, height, 0, fmt, GL_UNSIGNED_BYTE, None )
+        glTexImage2D ( tex.target, 0, intFormat,  width, height, 0, format, GL_UNSIGNED_BYTE, None )
 
         return tex
 

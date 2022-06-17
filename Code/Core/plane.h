@@ -43,7 +43,6 @@ public:
 		float	len = glm::length ( n );
 
 		n /= len;
-		//d /= len;
 
 		computeNearPointMaskAndMainAxis ();
 	}

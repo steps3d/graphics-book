@@ -174,7 +174,7 @@ void	Camera :: getPlanePolyForZ ( float z, glm::vec3 * poly ) const
 	poly [2] = glm::vec3 ( mvInv * glm::vec4 ( base * glm::vec3 (  1,  1, 1 ), 1.0 ) );
 	poly [3] = glm::vec3 ( mvInv * glm::vec4 ( base * glm::vec3 (  1, -1, 1 ), 1.0 ) );
 }
-bool	Camera::bboxVisible ( const bbox& box ) const
+bool	Camera::isVisible ( const bbox& box ) const
 {
 	glm::mat4	m ( proj );
 
@@ -209,7 +209,8 @@ bool	Camera::bboxVisible ( const bbox& box ) const
 			 m [3][3] - m [2][3] );
 
 
-	return  (box.classify ( left   ) != IN_BACK) &&
+	return  
+        (box.classify ( left   ) != IN_BACK) &&
 		(box.classify ( right  ) != IN_BACK) &&
 		(box.classify ( bottom ) != IN_BACK) &&
 		(box.classify ( top    ) != IN_BACK) &&
@@ -217,3 +218,57 @@ bool	Camera::bboxVisible ( const bbox& box ) const
 		(box.classify ( near   ) != IN_BACK);
 }
 
+bool    Camera::isVisible ( const sphere& sphere ) const
+{
+	plane	left (  m [3][0] + m [0][0], 
+			m [3][1] + m [0][1], 
+			m [3][2] + m [0][2],
+			m [3][3] + m [0][3] );
+
+	plane	right(  m [3][0] - m [0][0], 
+			m [3][1] - m [0][1], 
+			m [3][2] - m [0][2],
+			m [3][3] - m [0][3] );
+
+	plane	bottom ( m [3][0] + m [1][0],
+			 m [3][1] + m [1][1],
+			 m [3][2] + m [1][2],
+			 m [3][3] + m [1][3] );
+
+	plane	top (    m [3][0] + m [1][0],
+			 m [3][1] + m [1][1],
+			 m [3][2] + m [1][2],
+			 m [3][3] + m [1][3] );
+
+	plane	near (   m [3][0] + m [2][0],
+			 m [3][1] + m [2][1],
+			 m [3][2] + m [2][2],
+			 m [3][3] + m [2][3] );
+
+	plane	far (    m [3][0] - m [2][0],
+			 m [3][1] - m [2][1],
+			 m [3][2] - m [2][2],
+			 m [3][3] - m [2][3] );
+
+
+        // for each plane center should be closer than -radius
+    if ( left.signedDistanceTo ( sphere.getCenter () ) < -sphere.getRadius () )
+        return false;
+
+    if ( right.signedDistanceTo ( sphere.getCenter () ) < -sphere.getRadius () )
+        return false;
+
+    if ( bottom.signedDistanceTo ( sphere.getCenter () ) < -sphere.getRadius () )
+        return false;
+
+    if ( top.signedDistanceTo ( sphere.getCenter () ) < -sphere.getRadius () )
+        return false;
+
+    if ( near.signedDistanceTo ( sphere.getCenter () ) < -sphere.getRadius () )
+        return false;
+
+    if ( far.signedDistanceTo ( sphere.getCenter () ) < -sphere.getRadius () )
+        return false;
+
+    return true;
+}

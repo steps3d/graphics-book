@@ -51,7 +51,7 @@ public:
 		m = glm::rotate(m, glm::radians(rot.y),  glm::vec3(0, 1, 0));
 		m = glm::rotate(m, glm::radians(rot.x),  glm::vec3(1, 0, 0));
 
-		return m;
+		return glm::lookAt ( eye, glm::vec3 ( 0.0f ), glm::vec3 ( 0, 0, 1 ) ) * m;
 	}
 
 	glm::mat3 normalMatrix ( const glm::mat4& mv ) const
@@ -61,8 +61,7 @@ public:
 	
 	glm::mat4 getProjection ( float fovDegrees = 60.0f, float zNear = 0.1f, float zFar = 100.0f ) const
 	{
-		return glm::perspective ( glm::radians( fovDegrees ), (float)getWidth () / (float)getHeight (), zNear, zFar ) * 
-		       glm::lookAt ( eye, glm::vec3 ( 0.0f ), glm::vec3 ( 0, 0, 1 ) );
+		return glm::perspective ( glm::radians( fovDegrees ), (float)getWidth () / (float)getHeight (), zNear, zFar ); 
 	}
 	
 	void	mouseMotion ( int x, int y ) override

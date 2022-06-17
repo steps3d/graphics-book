@@ -143,7 +143,9 @@ public:
 
 											// return poly (quad) for intersection of plane paraller to zNear plane with given z
 	void	getPlanePolyForZ ( float z, glm::vec3 * poly ) const;
-	bool	bboxVisible ( const bbox& box ) const;
+        // check most common bounding volumes for visibility
+	bool	isVisible ( const bbox& box ) const;
+    bool    isVisible ( const sphere& sphere ) const;
 	
 private:
 	void    computeMatrix ();				// compute vectors, transform matrix and build

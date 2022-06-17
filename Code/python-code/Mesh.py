@@ -167,18 +167,18 @@ class    Mesh:
         if mat is not None:
             nm = glm.inverseTranspose( glm.mat3 ( mat ) )       # matrix to transform directions
             
-            for index in range ( len(self.vertices) // 14 ):    # process every vertex
+            for index in range ( len(mesh.vertices) // 14 ):    # process every vertex
                 i   = index * 14
                                                                 # repack data from self.vertices and transform
-                p   = mat * glm.vec3 ( self.vertices [i:i+3]     ) + offs
-                n   = nm  * glm.vec3 ( self.vertices [i+5:i+8]   )
-                t   = nm  * glm.vec3 ( self.vertices [i+8:i+11]  )
-                b   = nm  * glm.vec3 ( self.vertices [i+11:i+14] )
+                p   = mat * glm.vec3 ( mesh.vertices [i:i+3]     ) + offs
+                n   = nm  * glm.vec3 ( mesh.vertices [i+5:i+8]   )
+                t   = nm  * glm.vec3 ( mesh.vertices [i+8:i+11]  )
+                b   = nm  * glm.vec3 ( mesh.vertices [i+11:i+14] )
                                                                 # pack transformed values back
-                self.vertices [i:i+3]     = unvec ( *p )
-                self.vertices [i+5:i+8]   = unvec ( *n )
-                self.vertices [i+8:i+11]  = unvec ( *t )
-                self.vertices [i+11:i+14] = unvec ( *b )
+                mesh.vertices [i:i+3]     = unvec ( *p )
+                mesh.vertices [i+5:i+8]   = unvec ( *n )
+                mesh.vertices [i+8:i+11]  = unvec ( *t )
+                mesh.vertices [i+11:i+14] = unvec ( *b )
 
         mesh.create ()
 

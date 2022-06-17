@@ -93,7 +93,12 @@ class   Framebuffer:
         self.saveViewport = glGetIntegerv ( GL_VIEWPORT )       # save current viewport
         glBindFramebuffer ( GL_FRAMEBUFFER, self.id )
         glReadBuffer      ( GL_COLOR_ATTACHMENT0 )
-        glDrawBuffer      ( GL_COLOR_ATTACHMENT0 )
+        #glDrawBuffer      ( GL_COLOR_ATTACHMENT0 )
+        buffers = []
+        for i in range ( len ( self.colorBuffers ) ):
+            buffers.append ( GL_COLOR_ATTACHMENT0 + i )
+
+        glDrawBuffers     ( buffers )
         glViewport        ( 0, 0, self.width, self.height )
 
     def bindFace ( self, face ):
