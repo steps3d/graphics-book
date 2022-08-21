@@ -12,7 +12,11 @@ class    Buffer:
 
         assert self.id > 0, "Invalid buffer"
         glBindBuffer ( self.target, self.id )
-        glBufferData ( self.target, 4*len(data), numpy.array(data, dtype = dtype), GL_STATIC_DRAW )
+        if isinstance(data, bytes):
+            data= numpy.frombuffer ( data, dtype = dtype )
+        else:
+            numpy.array(data, dtype = dtype)
+        glBufferData ( self.target, data.itemsize*len(data), data, GL_STATIC_DRAW )
 
     '''
         Bind buffer to specific binding point
