@@ -69,7 +69,7 @@ class    Mesh:
             self.max.x = p.x
         if p.y > self.max.y:
             self.max.y = p.y
-        if p.z < self.max.z:
+        if p.z > self.max.z:
             self.max.z = p.z
 
     # return for vertex index tuple (pos, tex, n, t, b)
