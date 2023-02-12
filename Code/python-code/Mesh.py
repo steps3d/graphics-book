@@ -263,8 +263,27 @@ class    Mesh:
 
         return mesh
 
+    @classmethod
+    def createTessellatedPlane ( self, n1, n2, scaleX, scaleY ):
+        mesh  = Mesh ()
+        stepX = 1.0 / ( n1 + 1 )
+        stepY = 1.0 / ( n2 + 1 )
+        for i in range ( n1 + 1 ):
+            x = i * stepX * scaleX
+            for j in range ( n2 + 1 ):
+                z =  j * stepY * scaleY
+                pos, n, t, b = ( glm.vec3 ( x, 0.0, z ), glm.vec3(0,1,1), glm.vec3(1,0,0), glm.vec3(0,0,1) )
+                mesh.addVertex ( pos, glm.vec2 ( j * stepX, i * stepY ), n, t, b )
 
+        for i in range ( n1 - 1 ):
+            for j in range ( n2 - 1 ):
+                i1 = i + 1
+                j1 = j + 1
+                mesh.addFace ( i*(n1+1) + j, i1*(n1+1) + j,  i1*(n1+1) + j1 )
+                mesh.addFace ( i*(n1+1) + j, i1*(n1+1) + j1, i*(n1+1) + j1 )
 
+        mesh.create ()
 
+        return mesh
 
 
