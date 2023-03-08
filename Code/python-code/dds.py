@@ -1,14 +1,7 @@
 import struct
-import ctypes
 from OpenGL.GL import *
-from OpenGL.arrays.numpybuffers import *
 from OpenGL.GL.EXT import texture_compression_s3tc
-from OpenGL.raw import GL
 import numpy
-
-#from OpenGL import extensions
-#return extensions.hasGLExtension( _EXTENSION_NAME )
-
 
 DDSD_CAPS        = 0x00000001
 DDSD_HEIGHT      = 0x00000002
@@ -82,7 +75,7 @@ def readPixelFormat ( b, offs ):
 
     # returns dwCaps1, dwCaps2, dwDDSX
 def readDdCaps2 ( b, offs ):
-    return struct.unpack ( '<LLL', b [offs:offs+3*4] )
+    return struct.unpack ( '<LLLL', b [offs:offs+4*4] )
 
     # returns dxgiFormat, resourceDimension, miscFlag, arraySize, miscFlags2
 def readDx10Header ( b, offs ):
@@ -105,8 +98,8 @@ def readDds ( b ):
 
     offs += 76
     size, formatFlags, fourCC, rgbBitCount, rMask, gMask, bMask, aMask = readPixelFormat ( b, offs )
-	
-    offs += 8*4		# size = 32
+   
+    offs += 8*4     # size = 32
 
     print ( f'Size {size} {hex(formatFlags)} {fourCC}' )
     print ( 'Bit count', rgbBitCount, hex(rMask), hex(gMask), hex(bMask), hex(aMask) )    
@@ -120,15 +113,16 @@ def readDds ( b ):
         print ( 'Missing required flags in sPixelFormat.flags', hex(formatFlags), formatFlags )
         return
 
-    caps1, caps2, ddsx = readDdCaps2 ( b, offs )
-    offs += 4*3
+    caps1, caps2, _, _ = readDdCaps2 ( b, offs )
+    offs += 4*4     # 4 caps (dword)
+    offs += 4       # for dwReserved2 at the end of DDS_HEADER
 
     if (caps1 & DDSCAPS_TEXTURE) == 0:
         print ( 'Missing required flags in sCaps.dwCaps1', hex(caps1) )
         return
 
     print ( 'After headers offs is', offs )
-	
+   
     hasFourCC    = (formatFlags & DDPF_FOURCC) != 0
     hasAlpha     = (formatFlags & DDPF_ALPHAPIXELS) != 0
     hasMipmap    = ((caps1 & DDSCAPS_MIPMAP) != 0) and (mipMapCount > 1)
@@ -150,7 +144,7 @@ def readDds ( b ):
         target = GL_TEXTURE_3D
 
     if height == 1:
-        target = GL_TEXTURER_1D
+        target = GL_TEXTURE_1D
 
     if mipMapCount < 1:
         mipMapCount = 1
@@ -158,8 +152,8 @@ def readDds ( b ):
     if isCubeMap and (width != height):
         print ( 'Cubemap width != height' )
 
-    #print ( '------DDS------\n', fourCC, hasAlpha, hasMipmap, isCubeMap, isVolume )
-    
+    print ( '------DDS------\n', fourCC, 'alpha:', hasAlpha, 'mipmap:', hasMipmap, 'cubemap:', isCubeMap, 'volume:', isVolume )
+   
     if hasFourCC:
         if fourCC == b'30315844':    # DX10 signature
             dxgiFormat, resourceDimension, miscFlag, arraySize, miscFlags2 = readDx10Header ( b, offs )
@@ -199,8 +193,8 @@ def readDds ( b ):
             blockSize    = 16
             blockWidth   = 4
             blockHeight  = 4
-        
-    print ( 'Compr:', fourCC, isCompressed, blockWidth, blockHeight, blockSize, pitch )   
+       
+    print ( 'Compr:', fourCC, isCompressed, blockWidth, blockHeight, blockSize, pitch )  
 
     w = width
     h = height
@@ -208,13 +202,13 @@ def readDds ( b ):
 
     if isCompressed:
         blockPitch = (width + blockWidth - 1) // blockWidth
-        numBlocks  = blockPitch * ((height + blockHeight - 1) / blockHeight)
+        #numBlocks  = blockPitch * ((height + blockHeight - 1) / blockHeight)
         dxtFamily  = fourCC [3] - ord ( '1' ) + 1
-        
+       
         if (dxtFamily < 1) or (dxtFamily > 5):
             print ( 'Illegal dxtFamily', dxtFamily )
             return
-            
+           
         if dxtFamily == 1:
             format = texture_compression_s3tc.GL_COMPRESSED_RGBA_S3TC_DXT1_EXT if hasAlpha else texture_compression_s3tc.GL_COMPRESSED_RGB_S3TC_DXT1_EXT
         elif dxtFamily == 3:
@@ -228,15 +222,15 @@ def readDds ( b ):
     print ( 'BindTexture', GL_TEXTURE_CUBE_MAP if isCubeMap else target, id, target )
 
         # Set the texture wrapping parameters
-    glTexParameteri ( target, GL_TEXTURE_WRAP_S, GL_REPEAT )
-    glTexParameteri ( target, GL_TEXTURE_WRAP_T, GL_REPEAT )
-    glTexParameteri ( target, GL_TEXTURE_WRAP_R, GL_REPEAT )
+    glTexParameteri ( target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE if isCubeMap else GL_REPEAT )
+    glTexParameteri ( target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE if isCubeMap else GL_REPEAT )
+    glTexParameteri ( target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE if isCubeMap else GL_REPEAT )
 
         # Set texture filtering parameters
     glTexParameteri ( target, GL_TEXTURE_MIN_FILTER, GL_LINEAR )
     glTexParameteri ( target, GL_TEXTURE_MAG_FILTER, GL_LINEAR )
 
-    if not isCompressed:		# uncompressed data, simply load layers/levels
+    if not isCompressed:        # uncompressed data, simply load layers/levels
         for layer in range ( layerCount ):
             w = width
             h = height
@@ -248,7 +242,7 @@ def readDds ( b ):
                 numComponents = (rgbBitCount + 7) // 8
                 sz            = w * h * numComponents
                 bits          = b[offs:offs+sz]
-            
+           
                 if target == GL_TEXTURE_1D:
                     glCompressedTexImage1D ( trg, level, format, w, 0, bits )
                 elif target == GL_TEXTURE_2D:
@@ -257,7 +251,7 @@ def readDds ( b ):
                     glCompressedTexImage2D ( trg, level, format, w, h, d, 0, bits )
                 elif target == GL_TEXTURE_CUBE_MAP:
                     glCompressedTexImage2D ( cubeFaces[layer], level, format, w, h, 0, bits )
-        
+       
                     # prepare for next level
                 offs += sz
                 w     = max ( 1, w // 2 )
@@ -266,46 +260,44 @@ def readDds ( b ):
 
         return id, target, width, height, depth
 
-
-    #offs = 124    
         # now upload compressed texture data
     for layer in range ( layerCount ):
+
         w = width
         h = height
         d = depth
 
         for level in range ( mipMapCount ):
+
                 # upload level
-            trg = cubeFaces [layer] if isCubeMap else target
-                
             sz   = ((w + blockWidth - 1) // blockWidth) * ((h + blockHeight - 1) // blockHeight) * blockSize
-            bits = b[offs:offs+sz]
-            
-            #print ( f'Loading {level} {offs} {w} {h} {d}  Size = {sz}', len(bits) )
-            #print ( (w + blockWidth - 1) // blockWidth, (h + blockHeight - 1) // blockHeight, blockSize )
-            
+            trg  = cubeFaces [layer] if isCubeMap else target              
+            bits = b [offs:offs+sz]
+           
             if target == GL_TEXTURE_1D:
                 glCompressedTexImage1D ( trg, level, format, w, 0, bits )
             elif target == GL_TEXTURE_2D:
                 glCompressedTexImage2D ( trg, level, format, w, h, 0, bits )
             elif target == GL_TEXTURE_3D:
-                glCompressedTexImage2D ( trg, level, format, w, h, d, 0, bits )
+                glCompressedTexImage3D ( trg, level, format, w, h, d, 0, bits )
             elif target == GL_TEXTURE_CUBE_MAP:
-                print ( 'Loading cube face', layer, level, offs, w, h, len(b), sz, cubeFaces[layer], format )
-                glCompressedTexImage2D ( cubeFaces[layer], level, format, w, h, 0, bits )
-        
+                #print ( 'Loading cube face', layer, level, offs, w, h, len(b), sz, cubeFaces[layer], format, "blockSize:", blockSize )
+                glCompressedTexImage2D ( trg, level, format, w, h, 0, bits )
+       
                 # prepare for next level
             offs += sz
+
             w     = max ( 1, w // 2 )
             h     = max ( 1, h // 2 )
             d     = max ( 1, d // 2 )
 
-    #glGenerateMipmap ( target )
     #print ( 'OUT', id, target, width, height, depth, layerCount, isCubeMap, format )
+    #print ('Init size:', len(b), offs )
+    glGenerateMipmap ( target )
+
     return id, target, width, height, depth
 
 def readDdsFile ( fileName ):
     data = open ( fileName, 'rb').read ()
 
     return readDds ( data )
-
