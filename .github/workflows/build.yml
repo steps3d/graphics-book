@@ -1,0 +1,21 @@
+name: Build
+on: [push]
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Install packages
+        run:  sudo apt install gcc g++ cmake libmm-dev libglm-dev freeglut3-dev libassimp-dev
+      - name: Build
+        run: |
+          export ROOT=$(pwd)
+          cd ${ROOT}/Code/Chapter-1 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-3 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-6 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-7 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-9 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-10 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-12 && cmake . && make || exit 1
+          cd ${ROOT}/Code/Chapter-13 && cmake . && make || exit 1
