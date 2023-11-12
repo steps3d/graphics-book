@@ -3,6 +3,7 @@ import glm
 import Window
 import Program
 import Buffer
+import numpy
 
 class   MyWindow ( Window.RotationWindow ):
     def __init__ ( self, w, h, t ):
@@ -37,7 +38,7 @@ class   MyWindow ( Window.RotationWindow ):
     def initParticles ( self, num ):
         n                 = num
         self.numParticles = n * n * n
-        self.eye          = glm.vec3 ( -0.5, 0.5, 25 )
+        #self.eye          = glm.vec3 ( -0.5, 0.5, 25 )
 
             # init buffers with particle data
         vb = []
@@ -57,9 +58,9 @@ class   MyWindow ( Window.RotationWindow ):
                     vb.append ( 0 )
 
             # create VBO'a and VAO
-        self.vel = Buffer.Buffer ( GL_SHADER_STORAGE_BUFFER, vb )
+        self.vel = Buffer.Buffer ( GL_SHADER_STORAGE_BUFFER, numpy.array ( vb, dtype = numpy.float32 ) )
         self.vel.bindBase ( GL_SHADER_STORAGE_BUFFER, 1  )
-        self.pos = Buffer.Buffer ( GL_SHADER_STORAGE_BUFFER, pb )
+        self.pos = Buffer.Buffer ( GL_SHADER_STORAGE_BUFFER, numpy.array ( pb, dtype = numpy.float32 ) )
         self.pos.bindBase ( GL_SHADER_STORAGE_BUFFER, 0  )
 
             # create and init VAO
@@ -68,7 +69,7 @@ class   MyWindow ( Window.RotationWindow ):
         self.pos.bind          ( GL_ARRAY_BUFFER )
         self.render.use        ()
 
-        glVertexAttribPointer     ( 0, 4, GL_FLOAT, GL_FALSE, 16, ctypes.c_void_p(0))
+        glVertexAttribPointer     ( 0, 4, GL_FLOAT, GL_FALSE, 16, ctypes.c_void_p(0) )
         glEnableVertexAttribArray ( 0 )
 
         #self.render.setAttrPtr ( "pos", 4, 4*4, ctypes.c_void_p(0) )

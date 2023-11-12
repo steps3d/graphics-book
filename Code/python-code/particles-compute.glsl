@@ -8,7 +8,7 @@ uniform vec3  blackHolePos1   = vec3(5,0,0);
 uniform float gravity2        = 1000.0;
 uniform vec3  blackHolePos2   = vec3(-5,0,0);
 uniform float particleInvMass = 1.0 / 0.1;
-uniform float deltaT          = 0.0005;
+uniform float deltaT          = 0.0001;
 uniform float maxDist         = 45.0;
 
 layout(std430, binding = 0) buffer Pos 
