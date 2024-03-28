@@ -3,12 +3,9 @@
 
 layout (location = 0) in vec4 pos;
 
-uniform mat4 mv;
-uniform mat4 proj;
-
 void main()
 {
-    gl_Position = proj * mv * pos;
+	gl_Position = pos;
 }
 
 -- fragment
@@ -16,7 +13,8 @@ void main()
 
 layout( location = 0 ) out vec4 fragColor;
 
-void main() 
+void main()
 {
-    fragColor = vec4 ( 1.0, 1.0, 0.0, 0.1 );
+	fragColor = vec4 ( 1.0, 1.0, 0.0, 0.1 );
 }
+
