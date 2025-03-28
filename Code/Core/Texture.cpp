@@ -336,7 +336,6 @@ bool	Texture :: loadRect ( const std::string& file )
 	return true;
 }
 
-
 bool	Texture :: load2D ( const std::string& file )
 {
 	target   = GL_TEXTURE_2D;
@@ -441,6 +440,7 @@ bool	Texture :: loadCubemap ( const void * ptr, size_t len )
 bool	Texture :: load2DHdr ( const std::string& file )
 {
 //    stbi_set_flip_vertically_on_load ( true );
+
 	fileName = file;
 	
 	int 	numComponents;

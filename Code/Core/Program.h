@@ -13,10 +13,7 @@
 #include	<iostream>
 
 #define GLM_FORCE_RADIANS
-
-#ifndef GLM_SWIZZLE
-	#define GLM_SWIZZLE
-#endif
+#define GLM_FORCE_SWIZZLE
 
 #include	<glm/vec3.hpp>
 #include	<glm/vec4.hpp>
@@ -160,6 +157,7 @@ public:
 	int		uniformBlockBinding        ( int blockIndex ) const;
 	int		uniformBlockActiveUniforms ( int blockIndex ) const;
 	bool	getUniformBlockVar         ( int blockIndex, const char * varName, int& offs, int& size );
+
 		// assign a binding point to an active uniform block (by id or name)
 	void	bindBufferToIndex ( int uniformBlockIndex, int bindingIndex );
 	void	bindBufferToIndex ( const char * uniformBlockName, int bindingIndex );
@@ -236,6 +234,7 @@ public:
 	static	int maxTessEvalOutputComponents  ();
 	static	int	maxTessEvalUniformComponents ();
 	static	int maxCombinedTessEvalUniformComponents ();
+
 	friend inline std::ostream& operator << ( std::ostream& stream, const Program& p )
 	{ 
 		stream << "Program(\"" << p.fileName << "\")";

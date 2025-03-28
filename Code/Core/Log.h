@@ -20,7 +20,6 @@
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
 
-
 class	Log
 {
 	std::string			logName;
@@ -35,7 +34,6 @@ public:
 	{
 		logName = logFileName;
 		
-
 		return *this;
 	}
 	
@@ -54,7 +52,6 @@ public:
 
 		return *this;
 	}
-
 	
 	Log& operator << ( endl__ )
 	{
@@ -72,7 +69,6 @@ public:
 		
 		return *this;
 	}
-
 };
 
 Log& log ( int level = 0 );
@@ -99,5 +95,4 @@ inline std::ostream& operator << ( std::ostream& stream, const glm::vec4& v )
 
 	return stream;
 }
-
 */

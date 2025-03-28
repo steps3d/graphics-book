@@ -253,19 +253,19 @@ BasicMesh * createQuad ( const glm::vec3& org, const glm::vec3& dir1, const glm:
 	vertices [0].b   = b;
 
 	vertices [1].pos = org + dir2;
-	vertices [1].tex = glm::vec2 ( 0, 1 );
+	vertices [1].tex = glm::vec2 ( 0, glm::length(dir2) );
 	vertices [1].n   = n;
 	vertices [1].t   = t;
 	vertices [1].b   = b;
 	
 	vertices [2].pos = org + dir1 + dir2;
-	vertices [2].tex = glm::vec2 ( 1, 1 );
+	vertices [2].tex = glm::vec2 ( glm::length(dir1), glm::length(dir2) );
 	vertices [2].n   = n;
 	vertices [2].t   = t;
 	vertices [2].b   = b;
 	
 	vertices [3].pos = org + dir1;
-	vertices [3].tex = glm::vec2 ( 1, 0 );
+	vertices [3].tex = glm::vec2 ( glm::length(dir1), 0 );
 	vertices [3].n   = n;
 	vertices [3].t   = t;
 	vertices [3].b   = b;
@@ -548,7 +548,7 @@ static inline	glm::vec3 knot1D ( float t )
 	return r * glm::vec3 ( cos ( phi ) * sin ( 2*t ), cos ( phi ) * cos ( 2*t ), sin ( phi ) );
 }
 
-static inline	glm::vec3 knot ( float u, float v, glm::vec3& n, glm::vec3& t, glm::vec3& b )
+static inline	glm::vec3 knot ( float u, float v, glm::vec3& n, glm::vec3& t, glm::vec3& b, float r1 = 1, float r2 = 0.6f )
 {
 	t = glm::normalize ( knot1D (u + 0.01f) - knot1D (u - 0.01f) );
 	b = glm::normalize ( glm::cross ( t, glm::vec3 ( 0, 0, 1 ) ) );
@@ -557,7 +557,7 @@ static inline	glm::vec3 knot ( float u, float v, glm::vec3& n, glm::vec3& t, glm
 	n = sinf (v) * b + cosf (v) * n;
 	b = glm::cross ( n, t );
 	
-	return knot1D ( u ) + 0.6f * n;
+	return r1 * knot1D ( u ) + r2 * n;
 }
 
 BasicMesh * createKnot ( float r1, float r2, int rings, int sides )
@@ -581,7 +581,7 @@ BasicMesh * createKnot ( float r1, float r2, int rings, int sides )
 		{
 			float psi = j * sideDelta;
 
-			vertices [index].pos = knot ( phi, psi, vertices [index].n, vertices [index].t, vertices [index].b );
+			vertices [index].pos = knot ( phi, psi, vertices [index].n, vertices [index].t, vertices [index].b, r1, r2 );
 			vertices [index].tex = glm::vec2 ( j * invSides, i * invRings );
       		index++;
 		}
@@ -611,7 +611,58 @@ BasicMesh * createKnot ( float r1, float r2, int rings, int sides )
 	return mesh;
 }
 
+BasicMesh * createKnot ( const glm::vec3& org, float r1, float r2, int rings, int sides )
+{
+	float 	ringDelta = 2.0f * pi / rings;
+	float 	sideDelta = 2.0f * pi / sides;
+	float	invRings  = 1.0f / (float) rings;
+	float	invSides  = 1.0f / (float) sides;
+	int		index     = 0;
+	int	numVertices        = (sides+1)*(rings+1);
+	int	numTris            = sides * rings * 2;
+	BasicVertex * vertices = new BasicVertex [numVertices];
+	int         * faces    = new int [3*sides*rings*2];
+	int 	i, j;
+
+	for ( i = 0; i <= rings; i++ )
+	{
+		float	phi = i * ringDelta;
+
+		for ( j = 0; j <= sides; j++ )
+		{
+			float psi = j * sideDelta;
+
+			vertices [index].pos = org + knot ( phi, psi, vertices [index].n, vertices [index].t, vertices [index].b, r1, r2 );
+			vertices [index].tex = glm::vec2 ( j * invSides, i * invRings );
+			index++;
+		}
+	}
+											// Create faces
+	index = 0;
+
+	for ( i = 0; i < rings; i++ )
+		for ( j = 0; j < sides; j++ )
+		{
+			int	i1 = i + 1;
+			int	j1 = j + 1;
+
+			faces [index++] = i  * (sides+1) + j;
+			faces [index++] = i1 * (sides+1) + j;
+			faces [index++] = i1 * (sides+1) + j1;
+			faces [index++] = i  * (sides+1) + j;
+			faces [index++] = i1 * (sides+1) + j1;
+			faces [index++] = i  * (sides+1) + j1;
+		}
+		
+	BasicMesh * mesh = new BasicMesh ( vertices, faces, numVertices, numTris );
+	
+	delete vertices;
+	delete faces;
+	
+	return mesh;
+}
+
 BasicMesh * createHorQuad ( const glm::vec3& org, float s1, float s2 )
 {
-	return createQuad ( org, glm::vec3 ( 0.0f, s2, 0.0f ) , glm::vec3 ( s1, 0.0f, 0.0f ) );
+	return createQuad ( org, glm::vec3 ( 0.0f, 0.0f, s2 ) , glm::vec3 ( s1, 0.0f, 0.0f ) );
 }

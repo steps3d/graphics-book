@@ -51,6 +51,11 @@ public:
 	{
 		return depthBuffer != 0;
 	}
+
+	GLuint 	getId () const
+	{
+		return frameBuffer;
+	}
 	
 	Texture * getColorBuffer ( int no = 0 ) const
 	{
@@ -72,11 +77,11 @@ public:
 	bool	drawBuffers ( int no );		// set number of color buffers to render to
 										// must be bound !!!
 	
-	bool	attachColorTexture   ( Texture * tex, int no = 0 );
+	bool	attachColorTexture   ( Texture * tex, int no = 0, int level = 0 );
 	bool	attachCubeMapFace    ( Texture * tex, int face, int no = 0, int mipLevel = 0 );
 	bool	attach3DTextureSlice ( Texture * tex, int zOffs, int no = 0 );
-	bool	attachDepthTexture   ( unsigned texId );
-	bool	attachDepthTexture   ( Texture * tex );
+	bool	attachDepthTexture   ( unsigned texId, int level = 0 );
+	bool	attachDepthTexture   ( Texture * tex, int level = 0 );
 
 /*	
 	bool	detachColorTexture ( GLenum target )

@@ -29,7 +29,7 @@ public:
 
 class	Renderpass
 {
-	GLbitfield				 clear   = GL_COLOR_BUFFER_BIT;
+	GLbitfield				     clear   = GL_COLOR_BUFFER_BIT;
 	Program				       * program = nullptr;
 	FrameBuffer			       * target  = nullptr;
 	std::vector<std::pair<Texture *, int>>	textures;

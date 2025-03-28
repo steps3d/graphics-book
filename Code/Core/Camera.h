@@ -9,7 +9,7 @@
 #define __CAMERA__
 
 #define GLM_FORCE_RADIANS
-#define GLM_SWIZZLE
+#define GLM_FORCE_SWIZZLE
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -20,6 +20,7 @@
 
 class	quat;
 class	bbox;
+class	sphere;
 
 class   Camera
 {
@@ -143,9 +144,10 @@ public:
 
 											// return poly (quad) for intersection of plane paraller to zNear plane with given z
 	void	getPlanePolyForZ ( float z, glm::vec3 * poly ) const;
+
         // check most common bounding volumes for visibility
 	bool	isVisible ( const bbox& box ) const;
-    bool    isVisible ( const sphere& sphere ) const;
+	bool    isVisible ( const sphere& sphere ) const;
 	
 private:
 	void    computeMatrix ();				// compute vectors, transform matrix and build

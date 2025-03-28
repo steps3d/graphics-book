@@ -9,7 +9,7 @@
 #define __BOUNDING_BOX__
 
 #define GLM_FORCE_RADIANS
-#define GLM_SWIZZLE
+#define GLM_FORCE_SWIZZLE
 #include <glm/vec3.hpp>
 #include <glm/geometric.hpp>
 #include <glm/gtc/type_ptr.hpp>			// for make_mat
@@ -202,6 +202,7 @@ public:
 
 		return 0;						// plane crosses this box
 	}
+
 	float	distanceTo ( const bbox& box ) const
 	{
 		float	distSqr = 0;

@@ -23,17 +23,9 @@
 #include	<string.h>
 #include	"Data.h"
 
-Data :: Data ( void * ptr, int len )
+Data :: SharedBits :: SharedBits ( const std::string& _fileName )
 {
-	bits   = (uint8_t *) ptr;
-	length = len;
-	pos    = 0;
-}
-
-Data :: Data ( const std::string& fileName )
-{										// make a fix for windows to replace '/' in file path
-												// to windoze style '\\' if under windoze
-	std::string name ( fileName );
+	std::string name ( _fileName );
 #ifdef	_WIN32
 	size_t	    i;
 
@@ -41,10 +33,10 @@ Data :: Data ( const std::string& fileName )
 		name [i] = '\\';
 #endif
 	
-	bits   = nullptr;
-	length = 0;
-	pos    = 0;
-	file   = name;
+	bits     = nullptr;
+	length   = 0;
+	file     = name;
+	refCount = 1;
 
 	int	fd = open ( name.c_str (), O_RDONLY | O_BINARY );
 
@@ -83,11 +75,47 @@ Data :: Data ( const std::string& fileName )
 	close ( fd );
 }
 
+Data :: SharedBits :: ~SharedBits ()
+{
+	if ( bits != nullptr )
+		free ( bits );        	
+
+	bits = nullptr;
+	file.clear ();
+}
+
+Data :: Data ( SharedBits * ptr, int offs, int len )
+{
+	shared = ptr;
+	bits   = offs + (uint8_t *) ptr->bits;
+	length = len;
+	pos    = 0;
+
+	shared->refCount++;
+}
+
+Data :: Data ( const std::string& fileName )
+{
+	shared = new SharedBits ( fileName );
+	bits   = (uint8_t *) shared->bits;
+	length = shared->length;
+	pos    = 0;
+}
+
+Data :: Data ( void * ptr, int len )
+{
+	shared = nullptr;
+	bits   = (uint8_t *) ptr;
+	length = len;
+	pos    = 0;
+}
+
 Data :: ~Data ()
 {
-	if ( !file.empty () )
-		free ( bits );
+	if ( shared != nullptr )
+		shared -> release ();
 }
+
 bool	Data :: isOk () const
 {
 	return bits != nullptr;
@@ -148,6 +176,7 @@ bool	Data :: saveToFile ( const char * name ) const
 	return true;
 
 }
+
 void	Data :: dump ( int num, int offs ) const
 {
 	uint8_t * ptr = offs + (uint8_t *) bits;

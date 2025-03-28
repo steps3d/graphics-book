@@ -51,7 +51,7 @@ public:
 		m = glm::rotate(m, glm::radians(rot.y),  glm::vec3(0, 1, 0));
 		m = glm::rotate(m, glm::radians(rot.x),  glm::vec3(1, 0, 0));
 
-		return glm::lookAt ( eye, glm::vec3 ( 0.0f ), glm::vec3 ( 0, 0, 1 ) ) * m;
+		return glm::lookAt ( eye, glm::vec3 ( 0.0f, 1.0f, 0.0f ), glm::vec3 ( 0, 0, 1 ) ) * m;
 	}
 
 	glm::mat3 normalMatrix ( const glm::mat4& mv ) const

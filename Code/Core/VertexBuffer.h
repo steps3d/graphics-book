@@ -51,6 +51,7 @@ public:
 	void	resetData  ();			// free allocated memory
 	void  * map        ( GLenum access );
 	bool	unmap      ();
+
 	template <typename T>
 	void	setData ( std::vector<T>& data, GLenum usage = GL_STATIC_DRAW )
 	{

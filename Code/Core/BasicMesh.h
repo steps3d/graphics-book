@@ -12,9 +12,7 @@
 
 #define GLM_FORCE_RADIANS
 
-#ifndef GLM_SWIZZLE
-	#define GLM_SWIZZLE
-#endif
+#define GLM_FORCE_SWIZZLE
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -165,6 +163,11 @@ public:
 	{
 		return material;
 	}
+
+	VertexArray&	getVao ()
+	{
+		return vao;
+	}
 };
 
 struct MultiMesh
@@ -270,6 +273,7 @@ BasicMesh * createHorQuad ( const glm::vec3& org, float s1, float s2 );
 BasicMesh * createBox     ( const glm::vec3& pos, const glm::vec3& size, const glm::mat4 * mat = nullptr, bool invertNormal = false );
 BasicMesh * createTorus   ( float r1, float r2, int n1, int n2 );
 BasicMesh * createKnot    ( float r1, float r2, int n1, int n2 );
+BasicMesh * createKnot    ( const glm::vec3& org, float r1, float r2, int rings, int sides );
 BasicMesh * loadMesh      ( const char * fileName, float scale = 1.0f );
 bool 		loadAllMeshes ( const char * fileName, MultiMesh& mesh, std::vector<BasicMaterial *>& materials, float scale  = 1.0f );
 

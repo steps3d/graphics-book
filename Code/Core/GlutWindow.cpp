@@ -30,6 +30,7 @@ static  int				            numSamples = 1;
 static	std::string			        appName;
 
 bool	GlutWindow::hideExtendedErrors = true;
+
 static void	redisplayFunc ()
 {
 	GlutWindow * window = windows[glutGetWindow()];
@@ -187,6 +188,7 @@ static void	CALLBACK _errorCallback ( GLenum source, GLenum type, GLuint id,
                                      GLenum severity, GLsizei length, const GLchar * message, GLvoid * userParam )
 {
 	GlutWindow * window = (GlutWindow *) userParam;
+
 	if ( GlutWindow::hideExtendedErrors && id > 65535 )
 		return;
 	

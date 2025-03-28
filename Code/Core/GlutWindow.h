@@ -53,6 +53,7 @@ public:
 		return temp.c_str ();
 	}
 };
+
 class	GlutWindow
 {
 	std::string	caption;
@@ -143,7 +144,7 @@ public:
 		if ( flag == fullScreen )
 			return;
 
-		if ( fullScreen = flag )
+		if ( ( fullScreen = flag ) )
 			glutFullScreen ();
 		else
 			glutLeaveFullScreen ();
@@ -197,11 +198,13 @@ public:
 	}
 	
 	bool	makeScreenshot ( const char * fileName ) const;
+
 	void	exit ( MakeStr& str );
 	void 	exit ( const char * fmt, ... );
 	
 	static	void	init ( int& argc, char ** argv, int major = 4, int minor = 3, 
 	                       unsigned mode = GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH, bool debug = true, int _numSamples = 1 );
+
 	static	bool	hideExtendedErrors;	// hide NV-specific errors with large error ids
 };
 

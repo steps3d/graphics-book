@@ -70,7 +70,9 @@ bool	Program :: loadProgram ( Data * data )
 		{ "geometry",    GL_GEOMETRY_SHADER        },
 		{ "tesscontrol", GL_TESS_CONTROL_SHADER    },
 		{ "tesseval",    GL_TESS_EVALUATION_SHADER },
-		{ "compute",     GL_COMPUTE_SHADER         }
+		{ "compute",     GL_COMPUTE_SHADER         },
+		{ "mesh",        GL_MESH_SHADER_NV         },
+		{ "task",        GL_TASK_SHADER_NV         }
 	};
 	
 	std::string	s, body;
@@ -113,8 +115,6 @@ bool	Program :: loadProgram ( Data * data )
 		
 		if ( start < end && type != -1 )			// there is shader
 		{
-			//info [type].start = start;
-			//info [type].end   = end;
 			info [type].body  = body;
 		}
 		
@@ -133,8 +133,6 @@ bool	Program :: loadProgram ( Data * data )
 	
 	if ( start < end && type != -1 )				// process last shader
 	{
-		//info [type].start = start;
-		//info [type].end   = end;
 		info [type].body  = body;
 		start             = data -> getPos ();
 		end               = start;
@@ -144,7 +142,6 @@ bool	Program :: loadProgram ( Data * data )
 	for ( size_t i = 0; i < sizeof ( info ) / sizeof ( info [0] ); i++ )
 		if ( !info [i].body.empty () )	//info [i].start < info [i].end )
 		{
-			//Data	d    ( data -> getPtr ( info [i].start ), info [i].end - info [i].start );
 			Data	data ( (void *)info [i].body.c_str (), info [i].body.length () + 1 );		// XXX - m.b. strdup ?
 		
 			if ( !loadShaderOfType ( &data, info [i].type ) )
@@ -254,6 +251,15 @@ bool	Program :: loadShaderOfType ( Data * data, GLenum type )
 			computeShader = shader;
 			break;	
 					
+		case GL_MESH_SHADER_NV:
+			log += "Loading mesh shader.\n";
+			//computeShader = shader;
+			break;	
+
+		case GL_TASK_SHADER_NV:
+			log += "Loading task shader.\n";
+			//computeShader = shader;
+			break;	
 		default:
 			log += "Unknown shader type.\n";
 			return false;

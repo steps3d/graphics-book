@@ -68,7 +68,7 @@ bbox&    bbox :: addVertex ( const glm::vec3& v )
 
 bbox&	bbox :: addVertices ( const glm::vec3 * v, int numVertices )
 {
-	for ( register int i = 0; i < numVertices; i++ )
+	for ( int i = 0; i < numVertices; i++ )
 	{
 		if ( v [i].x < minPoint.x )
 			minPoint.x = v [i].x;

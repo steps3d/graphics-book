@@ -17,21 +17,42 @@
 
 class	Data
 {
-	uint8_t  * bits;
-	int		length;
+	struct	SharedBits
+	{
+		uint8_t  * bits = nullptr;
+		int		length   = 0;
+		std::string	file;		// when data loaded from file, contains it's name
+		int		refCount = 0;
+
+		SharedBits  ( const std::string& fileName );
+		~SharedBits ();
+
+		void	release ()
+		{
+			if ( --refCount < 1 )
+			{
+				free ( bits );
+				bits = nullptr;
+			}
+		}
+	};
+
+	SharedBits    * shared = nullptr;
+	uint8_t  * bits = nullptr;
+	int		length   = 0;
 	int		pos;
-	std::string	file;						// when data loaded from file, contains it's name
 
 public:
 	explicit Data ( const std::string& fileName );
+	Data ( SharedBits *, int offs, int len );
 	Data ( void * ptr, int len );
 	~Data ();
 
 	bool	isOk () const;
 
-	const std::string&	getFileName () const
+	const std::string	getFileName () const
 	{
-		return file;
+		return shared ? shared->file : "";
 	}
 	
 	bool	isEmpty () const
@@ -129,6 +150,19 @@ public:
 		return d;
 	}
 
+	template<typename T>
+	T get ()
+	{
+		if ( pos + sizeof(T) - 1 >= length )
+			return {};
+
+		T v = *(T *)(bits + pos);
+
+		pos += sizeof ( T );
+
+		return v;
+	}
+
 	void * getPtr () const
 	{
 		return bits + pos;
@@ -162,6 +196,11 @@ public:
 		return pos;
 	}
 
+	int	skip ( int delta )
+	{
+		return seekCur ( delta );
+	}
+
 	std::string	getString ()
 	{
 		std::string	str;
@@ -170,6 +209,11 @@ public:
 			return "";
 		
 		return str;
+	}
+
+	Data	subData ( int offset, int size )
+	{
+		return Data ( shared, offset, size );
 	}
 	
 	int		getBytes   ( void * ptr, int len );

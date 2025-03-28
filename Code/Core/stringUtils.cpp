@@ -13,6 +13,7 @@ bool		stringStarts  ( const std::string& str, const std::string& s )
 
 	return str.substr ( 0, s.length () ) == s;
 }
+
 std::string	stringTrim ( const std::string& str )
 {
 	int	len = (int)str.length ();

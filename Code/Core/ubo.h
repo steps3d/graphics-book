@@ -69,6 +69,7 @@ public:
 	void	bindToProgram ( Program& program, const std::string& bufferName )
 	{
 		GLuint	blockIndex = glGetProgramResourceIndex ( program.getProgram (), GL_UNIFORM_BLOCK, bufferName.c_str () );
+
 			// assign a binding point to an active uniform block
 		program.bindBufferToIndex ( blockIndex, binding );
 	}

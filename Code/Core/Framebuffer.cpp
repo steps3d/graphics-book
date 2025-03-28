@@ -171,7 +171,7 @@ bool	FrameBuffer :: unbind ( bool genMipmaps, GLenum target )
 	return true;
 }
 
-bool	FrameBuffer :: attachColorTexture ( Texture * tex, int no )
+bool	FrameBuffer :: attachColorTexture ( Texture * tex, int no, int level )
 {
 	if ( frameBuffer == 0 )
 		return false;
@@ -182,7 +182,7 @@ bool	FrameBuffer :: attachColorTexture ( Texture * tex, int no )
 	colorBuffer [no] = tex;
 	
 	glBindTexture          ( tex -> getTarget (), tex -> getId () );
-	glFramebufferTexture2D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, tex -> getTarget (), tex -> getId (), 0 );
+	glFramebufferTexture2D ( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + no, tex -> getTarget (), tex -> getId (), level );
 
 	return true;
 }
@@ -221,22 +221,22 @@ bool	FrameBuffer :: attach3DTextureSlice ( Texture * tex, int zOffs, int no )
 	return true;
 }
 
-bool	FrameBuffer :: attachDepthTexture ( unsigned texId )
+bool	FrameBuffer :: attachDepthTexture ( unsigned texId, int level )
 {
 	if ( frameBuffer == 0 )
 		return false;
 
-	glFramebufferTexture ( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthBuffer = texId, 0 );
+	glFramebufferTexture ( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthBuffer = texId, level );
 
 	return true;
 }
 
-bool	FrameBuffer::attachDepthTexture ( Texture * tex )
+bool	FrameBuffer::attachDepthTexture ( Texture * tex, int level )
 {
 	if ( frameBuffer == 0 )
 		return false;
 
-	glFramebufferTexture ( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthBuffer = tex->getId (), 0 );
+	glFramebufferTexture ( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthBuffer = tex->getId (), level );
 
 	return true;
 }

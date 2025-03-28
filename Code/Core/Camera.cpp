@@ -9,6 +9,7 @@
 #include	"common.h"
 #include	"plane.h"
 #include	"bbox.h"
+#include	"sphere.h"
 
 #define GLM_ENABLE_EXPERIMENTAL				// for GLM_GTX_euler_angles
 
@@ -174,6 +175,8 @@ void	Camera :: getPlanePolyForZ ( float z, glm::vec3 * poly ) const
 	poly [2] = glm::vec3 ( mvInv * glm::vec4 ( base * glm::vec3 (  1,  1, 1 ), 1.0 ) );
 	poly [3] = glm::vec3 ( mvInv * glm::vec4 ( base * glm::vec3 (  1, -1, 1 ), 1.0 ) );
 }
+
+
 bool	Camera::isVisible ( const bbox& box ) const
 {
 	glm::mat4	m ( proj );
@@ -208,7 +211,6 @@ bool	Camera::isVisible ( const bbox& box ) const
 			 m [3][2] - m [2][2],
 			 m [3][3] - m [2][3] );
 
-
 	return  
         (box.classify ( left   ) != IN_BACK) &&
 		(box.classify ( right  ) != IN_BACK) &&
@@ -220,6 +222,8 @@ bool	Camera::isVisible ( const bbox& box ) const
 
 bool    Camera::isVisible ( const sphere& sphere ) const
 {
+	glm::mat4	m ( proj );
+
 	plane	left (  m [3][0] + m [0][0], 
 			m [3][1] + m [0][1], 
 			m [3][2] + m [0][2],

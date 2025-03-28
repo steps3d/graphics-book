@@ -14,7 +14,6 @@
 #include	<glm/gtc/matrix_transform.hpp>
 #include	<glm/gtc/matrix_inverse.hpp>
 #include	<glm/gtc/matrix_transform.hpp>
-//#include	<stdio.h>
 
 class	GlutCameraWindow : public GlutWindow
 {
@@ -56,6 +55,11 @@ public:
 		glm::vec3 pos  = camera.getPos     ();
 		
 		return glm::lookAt ( pos, pos + view, up );
+	}
+
+	const Camera& getCamera () const
+	{
+		return camera;
 	}
 	
 	glm::mat4 getProjection () const
