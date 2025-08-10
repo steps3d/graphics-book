@@ -196,6 +196,7 @@ class Window:
             glfw.swap_buffers ( self.window )
             self.updateFps    ()
         glfw.terminate()
+
     def updateFps ( self ):
         for i in range ( len ( self.frameTime ) - 1 ):
             self.frameTime [i] = self.frameTime [i+1]
@@ -225,7 +226,7 @@ class RotationWindow (Window):
         m = glm.rotate ( m, glm.radians ( -self.rot.z ), glm.vec3 ( 0, 0, 1 ) )
         m = glm.rotate ( m, glm.radians (  self.rot.y ), glm.vec3 ( 0, 1, 0 ) )
         m = glm.rotate ( m, glm.radians (  self.rot.x ), glm.vec3 ( 1, 0, 0 ) )
-        return glm.lookAt ( self.eye, glm.vec3 ( 0, 0, 0 ), glm.vec3 ( 0, 0, 1 ) ) * m
+        return glm.lookAt ( self.eye, glm.vec3 ( 0, 0, 0 ), glm.vec3 ( 0, 1, 0 ) ) * m
 
     def normalMatrix ( self, m ):
         return glm.inverseTranspose ( glm.mat3 ( m ) )
@@ -249,8 +250,8 @@ class RotationWindow (Window):
                 self.mouseOldY = y
                 return
 
-            self.rot.x -= ((self.mouseOldY - y) * 180.0) / 200.0
-            self.rot.z -= ((self.mouseOldX - x) * 180.0) / 200.0
+            self.rot.x -= ((self.mouseOldX - x) * 180.0) / 200.0
+            self.rot.z -= ((self.mouseOldY - y) * 180.0) / 200.0
             self.rot.y  = 0
 
             if self.rot.z > 360:

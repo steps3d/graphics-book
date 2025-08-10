@@ -52,7 +52,7 @@ void produceVertices ( in vec4 v, in vec3 n )
 		EmitVertex ();
 
 		v.xyz += step * n;
-		//v.z   -= droop * float ( i * i );
+		v.z   -= droop * float ( i * i );
 	}
 
 	EndPrimitive ();
@@ -88,15 +88,11 @@ void main ()
 			vec3 n = normalize ( n0 + s*n01 + t*n02 );
 
 			produceVertices ( v, n );
-			//produceVertices ( s, t );
 			s += ds;
 		}
 
 		t -= dt;
 	}
-
-//produceVertices ( v0 + 0.5*v01 + 0.5*v02, normalize ( n0 + 0.5*n01 + 0.5*n02 ) );
-
 }
 
 -- fragment

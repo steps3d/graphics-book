@@ -33,7 +33,7 @@ class   MyWindow ( Window.RotationWindow ):
         self.angle1  = 0.0
         self.angle2  = 0.0
         self.step1   = 0.002
-        self.step2   = 0.001
+        self.step2   = 0.0005
         self.e1      = glm.vec4 (  1,  2, -5,  9 )
         self.e2      = glm.vec4 ( -9,  4,  2,  7 )
         self.dir     = glm.vec4 (  1, -1,  3, -1 )

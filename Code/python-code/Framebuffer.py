@@ -46,6 +46,7 @@ class   Framebuffer:
 
     def createTexture ( self, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
         return Texture.Texture.createEmpty ( self.width, self.height, target = target, intFormat = intFormat, format = format, clamp = clamp, filter = filter )
+
     def attachDepthTexture ( self, tex ):
         assert self.id != 0, "Must have a valid framebuffer object"
         assert self.width == tex.width and self.height == tex.height, "Texture size must match to framebuffer"

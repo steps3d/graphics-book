@@ -44,6 +44,7 @@ class    Buffer:
     def bindRange ( self, target, index, offset, size ):
         self.target = target
         glBindBufferRange ( target, index, id, offset, size )
+
     '''
         Change data in buffer to new data, reallocating GPU memory
     '''

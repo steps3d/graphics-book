@@ -3,7 +3,7 @@
 from OpenGL.GL import glGenTextures, glPixelStorei, glTexImage2D, glTexImage3D, glBindTexture, glTexParameteri, glGenerateMipmap, glActiveTexture
 from OpenGL.GL import GL_UNPACK_ALIGNMENT, GL_RGB, GL_RGBA, GL_UNSIGNED_BYTE, GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D, GL_TEXTURE_CUBE_MAP
 from OpenGL.GL import GL_LINEAR, GL_NEAREST,GL_REPEAT, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T, GL_TEXTURE_WRAP_R, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_MAG_FILTER
-from OpenGL.GL import GL_RGBA8, GL_TEXTURE0, GL_TEXTURE_BASE_LEVEL, GL_TEXTURE_CUBE_MAP_POSITIVE_X
+from OpenGL.GL import GL_RGBA8, GL_TEXTURE0, GL_TEXTURE_BASE_LEVEL, GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_R8, GL_RED
 #import OpenGL.GL.shaders
 import numpy
 from PIL import Image
@@ -15,6 +15,7 @@ def  _loadImage2D ( target, image ):
         image = image.convert ( mode = 'RGB' )
 
     #print ( image.mode, image.width, image.height )
+
     img_data = numpy.array(list(image.getdata()), numpy.uint8)
     glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 )	# set 1-byte alignment
 
@@ -89,7 +90,46 @@ class    Texture:
         #glTexImage3D ( tex.target, 0, intFormat,  width, height, depth, 0, format, GL_UNSIGNED_BYTE, None )
 
         return tex
+
+    @classmethod
+    def createWithData ( cls, width, height, data, target = GL_TEXTURE_2D, intFormat = GL_RGBA8, format = GL_RGBA, clamp = GL_REPEAT, filter = GL_LINEAR ):
+        tex        = Texture ( filename = None, target = target, clamp = clamp, filter = filter )
+        tex.width  = width
+        tex.height = height
+
+        tex.bind ()
+        glTexImage2D ( tex.target, 0, intFormat,  width, height, 0, format, GL_UNSIGNED_BYTE, data )
+
+        return tex
 	
+    @classmethod
+    def as3D ( cls, filename, w, h, d, asRed = False ):
+        image = Image.open ( filename )
+
+        assert image.width == w * d and image.height == h
+
+        if asRed and image.mode != 'L':     # pick red channel only
+            image = image.split () [0]
+                
+            # split into slices and concatenate data
+        slices   = [image.crop ( (i*w,0,i*w+w,h) ) for i in range ( image.width // w ) ]
+        imgData  = numpy.concatenate ( [ numpy.array(list(i.getdata()), numpy.uint8) for i in slices ] )
+        intFmt   = GL_RGBA8
+        fmt      = GL_RGBA
+
+        if image.mode == 'L':
+            intFmt, fmt = GL_R8, GL_RED
+        elif image.mode == 'RGB':
+            intFmt, fmt = GL_RGB8, GL_RGB
+
+        tex  = Texture.createEmpty3D ( w, h, d, intFmt, fmt )
+        tex.bind ()
+
+        glPixelStorei ( GL_UNPACK_ALIGNMENT, 1 )    # set 1-byte alignment
+        glTexImage3D  ( tex.target, 0, intFmt,  w, h, d, 0, fmt, GL_UNSIGNED_BYTE, imgData )
+
+        return tex
+
     def bind ( self, unit = 0 ):
         assert self.id != 0, "Texture not loaded"
         glActiveTexture ( GL_TEXTURE0 + unit )

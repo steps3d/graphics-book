@@ -8,12 +8,14 @@ from OpenGL.GL import GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER, 
 from OpenGL.GL import glUseProgram, glGetUniformLocation,glUniform1i, glUniform1f   #, glUniform2f, glUniform3f, glUniform4f
 from OpenGL.GL import  glUniform2fv, glUniform3fv, glUniform4fv, glUniformMatrix2fv, glUniformMatrix3fv, glUniformMatrix4fv
 from OpenGL.GL import  glVertexAttribPointer, glVertexAttribIPointer, glEnableVertexAttribArray
+
 import OpenGL.GL.shaders
 import glm
 
 class    Program:
     types = {"vertex" : GL_VERTEX_SHADER, "fragment" : GL_FRAGMENT_SHADER, "geometry": GL_GEOMETRY_SHADER,
             "tesscontrol": GL_TESS_CONTROL_SHADER, "tesseval": GL_TESS_EVALUATION_SHADER, "compute": GL_COMPUTE_SHADER}
+
             
     def __init__ ( self, validate = False, **kwargs ):
         if "glsl" in kwargs:        # get all shaders from one file using -- syntax
@@ -59,7 +61,7 @@ class    Program:
         data = dict ()                  # shader type to GL type and source
         curr = None                     # no active type
         
-        with open ( filename ) as file:
+        with open ( filename, encoding = 'utf-8' ) as file:
             for line in file:
 
                 if line.lstrip ().startswith ( '//' ) or line.lstrip () == "":
@@ -68,7 +70,7 @@ class    Program:
                 if line.lstrip ().startswith ( '#include' ):
 
                         # get file name and dequote it
-                    file = line.split ()[1][1:-2]
+                    file = line.split ()[1][1:-1]
                     with open ( file ) as f:
                         for ln in f:
                             data [curr] = data [curr] + ln
@@ -130,6 +132,7 @@ class    Program:
                     # add defines
                 for k in defines:
                     res = res + f'#define {k}\t\t{defines[k]}\n'
+
                 # add line as it is
             res = res + line + '\n'
         return res
@@ -203,16 +206,32 @@ class    Program:
         else:
             assert True, f"Invalid matrix type {type(value)}"
 
+    def setUniformVecs ( self, name, values ):
+        v   = tuple (y for x in values for y in x.to_tuple())     # flatten list of glm.vec
+        n   = len ( values )
+        loc = glGetUniformLocation ( self.program, name )
+        if loc < 0:
+            return
+
+        if isinstance(values [0], glm.vec2):
+            glUniform2fv(loc, n, v )
+        elif isinstance(values [0], glm.vec3):
+            glUniform3fv(loc, n, v )
+        elif isinstance(values [0], glm.vec4):
+            glUniform4fv(loc, n, v )
+
     def setAttrPtr ( self, name, numComponents, stride, offs, attrType = GL_FLOAT, normalized = False ):
         loc = glGetUniformLocation ( self.program, name )
         if loc < 0:
             return
+
         glVertexAttribPointer ( loc,                       # index
                                 numComponents,             # number of values per vertex
                                 attrType,                  # type (GL_FLOAT)
                                 GL_TRUE if normalized else GL_FALSE,
                                 stride,                    # stride (offset to next vertex data)
                                 offs )
+
         
         glEnableVertexAttribArray ( loc )
 
@@ -220,11 +239,12 @@ class    Program:
         loc = glGetUniformLocation ( self.program, name )
         if loc < 0:
             return
+
         glVertexAttribIPointer ( loc,                       # index
                                 numComponents,              # number of values per vertex
                                 attrType,                   # type (GL_FLOAT)
                                 stride,                     # stride (offset to next vertex data)
                                 offs )
+
         
         glEnableVertexAttribArray ( loc )
-

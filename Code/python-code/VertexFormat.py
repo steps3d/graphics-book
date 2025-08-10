@@ -17,7 +17,7 @@ class   VertexFormat:
         self.vao   = 0
         self.index = None
         self.attrs = []
-        
+
     def add ( self, buf, id, dim, type = GL_FLOAT, normalized = False, offs = -1 ):
         self.attrs.append ( { 'buffer': buf, 'id': id, 'offs': offs, 'type': type, 'dim': dim, 'normalized': normalized } )
         return self

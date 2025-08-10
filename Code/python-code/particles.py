@@ -25,7 +25,9 @@ class   MyWindow ( Window.RotationWindow ):
         glMemoryBarrier   ( GL_SHADER_STORAGE_BARRIER_BIT )
 
         self.render.use ()
-        self.render.setUniformMat ( "mvp",  self.getProjection () * self.getRotation () )
+        #self.render.setUniformMat ( "mvp",  self.getProjection () * self.getRotation () )
+        self.render.setUniformMat ( "mv",   self.getRotation   () )
+        self.render.setUniformMat ( "proj", self.getProjection () )
         glBindVertexArray ( self.vao )
         self.pos.bind          ( GL_ARRAY_BUFFER )
         glPointSize       ( 1.0 )
@@ -69,7 +71,7 @@ class   MyWindow ( Window.RotationWindow ):
         self.pos.bind          ( GL_ARRAY_BUFFER )
         self.render.use        ()
 
-        glVertexAttribPointer     ( 0, 4, GL_FLOAT, GL_FALSE, 16, ctypes.c_void_p(0) )
+        glVertexAttribPointer     ( 0, 4, GL_FLOAT, GL_FALSE, 16, ctypes.c_void_p(0))
         glEnableVertexAttribArray ( 0 )
 
         #self.render.setAttrPtr ( "pos", 4, 4*4, ctypes.c_void_p(0) )
